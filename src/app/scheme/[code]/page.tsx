@@ -162,9 +162,6 @@ export default function SchemeDetailPage() {
             }}
           >
             <CardContent>
-              <Typography variant="h6" fontWeight={600} gutterBottom>
-                SIP Calculator
-              </Typography>
               <SIPCalculator code={meta.schemeCode} />
             </CardContent>
           </Card>

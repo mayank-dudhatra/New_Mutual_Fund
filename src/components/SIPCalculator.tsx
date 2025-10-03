@@ -163,7 +163,7 @@ export default function SIPCalculator({ code }: { code: string }) {
             }}
         >
             <Typography variant="h5" fontWeight={700} gutterBottom sx={{ mb: 3 }}>
-                SIP Calculator 📊
+                SIP Calculator 
             </Typography>
 
             {/* --- INPUTS SECTION --- */}
