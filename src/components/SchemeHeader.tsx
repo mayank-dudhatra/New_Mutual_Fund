@@ -3,9 +3,10 @@
 
 import { useMemo } from "react";
 import { Box, Chip, Grid, Paper, Typography, alpha, useTheme, Divider, Stack, Avatar } from "@mui/material";
-import { ArrowUpward, Star, AccountBalanceWallet } from "@mui/icons-material";
+import { ArrowUpward, TrendingUp } from "@mui/icons-material";
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
+import { calculateCAGR } from "@/lib/utils";
 
 dayjs.extend(customParseFormat);
 
@@ -26,7 +27,7 @@ export default function SchemeHeader({ meta, navHistory }: SchemeHeaderProps) {
 
   const calculations = useMemo(() => {
     if (!navHistory || navHistory.length < 2) {
-      return { oneDayChange: null, fiveYearReturn: null, inceptionDate: meta.date };
+      return { oneDayChange: null, fiveYearReturn: null, inceptionDate: meta.date, cagr: null };
     }
 
     const sortedHistory = [...navHistory].map(d => ({...d, parsedDate: dayjs(d.date, "DD-MM-YYYY")}))
@@ -46,16 +47,26 @@ export default function SchemeHeader({ meta, navHistory }: SchemeHeaderProps) {
 
     const inceptionDate = sortedHistory[0].parsedDate.format("DD MMMM YYYY");
 
+    const firstNav = sortedHistory[0];
+    const lastNav = sortedHistory[sortedHistory.length - 1];
+    const years = lastNav.parsedDate.diff(firstNav.parsedDate, 'year', true);
+    let cagr = null;
+    if (years > 0) {
+        cagr = calculateCAGR(firstNav.nav, lastNav.nav, years)
+    }
+
+
     return { 
       latestNav: latest.nav.toFixed(4),
       latestNavDate: latest.parsedDate.format("DD MMM YYYY"),
       oneDayChange: oneDayChange.toFixed(2), 
       fiveYearReturn: fiveYearReturn ? fiveYearReturn.toFixed(2) : null,
-      inceptionDate
+      inceptionDate,
+      cagr: cagr ? cagr.toFixed(2) : null
     };
   }, [navHistory, meta.date]);
 
-  const { latestNav, latestNavDate, oneDayChange, fiveYearReturn, inceptionDate } = calculations;
+  const { latestNav, latestNavDate, oneDayChange, fiveYearReturn, inceptionDate, cagr } = calculations;
   const fundInitial = meta.fundHouse.charAt(0);
 
   return (
@@ -110,22 +121,15 @@ export default function SchemeHeader({ meta, navHistory }: SchemeHeaderProps) {
           </Box>
         )}
 
-        <Box textAlign="center" sx={{ display: 'flex', gap: 2 }}>
-            <Paper variant="outlined" sx={{ p: '8px 12px', borderRadius: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
-                <Typography variant="h6" fontWeight="700">1</Typography>
-                <Box>
-                    <Star sx={{ color: 'warning.main', fontSize: '1rem' }} />
-                    <Typography variant="caption" display="block">Morningstar</Typography>
+        {cagr && (
+            <Box textAlign="center">
+                <Typography variant="body2" color="text.secondary" gutterBottom>CAGR</Typography>
+                <Box sx={{ display: 'flex', alignItems: 'center', color: 'success.main' }}>
+                <Typography variant="h6" fontWeight="700">{cagr}%</Typography>
+                <TrendingUp sx={{ fontSize: '1.2rem', ml: 0.5 }} />
                 </Box>
-            </Paper>
-            <Paper variant="outlined" sx={{ p: '8px 12px', borderRadius: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
-                <Typography variant="h6" fontWeight="700">1</Typography>
-                <Box>
-                    <Star sx={{ color: 'warning.main', fontSize: '1rem' }} />
-                    <Typography variant="caption" display="block">Value Research</Typography>
-                </Box>
-            </Paper>
-        </Box>
+            </Box>
+        )}
       </Stack>
        
        {/* About Fund Section */}
