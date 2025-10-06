@@ -610,7 +610,6 @@ import {
     CartesianGrid,
 } from "recharts";
 import CalculateIcon from '@mui/icons-material/Calculate'; 
-import AttachMoneyIcon from '@mui/icons-material/AttachMoney'; 
 import TrendingUpIcon from '@mui/icons-material/TrendingUp'; 
 import dayjs from "dayjs";
 
@@ -618,26 +617,28 @@ import dayjs from "dayjs";
 const formatCurrency = (val: number) => `₹${val.toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
 const formatPercent = (val: number) => `${val.toFixed(2)}%`;
 
-
 const CustomTooltip = ({ active, payload, label }: any) => {
     const theme = useTheme();
     if (active && payload && payload.length) {
+        const data = payload[0].payload;
         return (
             <Paper
                 elevation={6} 
                 sx={{
                     p: 1.5,
                     backgroundColor: alpha(theme.palette.background.paper, 0.95), 
-                    backdropFilter: 'blur(5px)', 
                     border: `1px solid ${theme.palette.divider}`,
                     borderRadius: 2, 
                 }}
             >
                 <Typography variant="caption" color="text.secondary" fontWeight={500}>
-                    Date: <Box component="span" fontWeight="700">{label}</Box>
+                    Date: <Box component="span" fontWeight="700">{dayjs(label).format('DD MMM, YYYY')}</Box>
+                </Typography>
+                 <Typography variant="body2" fontWeight={600} color="primary.main">
+                    Total Invested: {formatCurrency(data.investment)}
                 </Typography>
                 <Typography variant="subtitle1" fontWeight={700} color="success.main">
-                    Value: {formatCurrency(payload[0].value)}
+                    Market Value: {formatCurrency(data.value)}
                 </Typography>
             </Paper>
         );
@@ -645,10 +646,10 @@ const CustomTooltip = ({ active, payload, label }: any) => {
     return null;
 };
 
+
 // --- START OF MAIN COMPONENT ---
 export default function SIPCalculator({ code }: { code: string }) {
     const [amount, setAmount] = useState<number>(5000);
-    // Corrected: Set default dates to a realistic historical range
     const [from, setFrom] = useState<string>(dayjs().subtract(1, 'year').format('YYYY-MM-DD'));
     const [to, setTo] = useState<string>(dayjs().format('YYYY-MM-DD'));
     const [result, setResult] = useState<any>(null);
@@ -761,7 +762,27 @@ export default function SIPCalculator({ code }: { code: string }) {
                                             width={70}
                                         />
                                         <Tooltip content={<CustomTooltip />} />
-                                        <Line type="monotone" dataKey="value" stroke={theme.palette.success.main} strokeWidth={2.5} dot={false} activeDot={{ r: 6 }} />
+                                        
+                                        {/* Line for Total Investment (Step Chart) */}
+                                        <Line 
+                                            type="stepAfter" 
+                                            dataKey="investment" 
+                                            name="Total Investment"
+                                            stroke={theme.palette.primary.main} 
+                                            strokeWidth={2} 
+                                            dot={false} 
+                                        />
+
+                                        {/* Line for Market Value (Curved Chart) */}
+                                        <Line 
+                                            type="monotone" 
+                                            dataKey="value" 
+                                            name="Market Value"
+                                            stroke={theme.palette.success.main} 
+                                            strokeWidth={2.5} 
+                                            dot={false} 
+                                            activeDot={{ r: 6 }} 
+                                        />
                                     </LineChart>
                                 </ResponsiveContainer>
                             </Box>
