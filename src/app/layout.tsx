@@ -1,22 +1,17 @@
 import "./globals.css";
 import { Inter } from "next/font/google";
-import {
-  CssBaseline,
-  AppBar,
-  Toolbar,
-  Typography,
-  Button,
-  Box,
-} from "@mui/material";
-import Link from "next/link";
+import { CssBaseline } from "@mui/material";
+import Navbar from "@/components/Navbar"; // Import the new client component
 
 const inter = Inter({ subsets: ["latin"] });
 
+// metadata export can only be in a Server Component
 export const metadata = {
   title: "Mutual Fund Explorer",
   description: "Mutual Fund Explorer with SIP Calculator",
 };
 
+// RootLayout remains a Server Component
 export default function RootLayout({
   children,
 }: {
@@ -27,29 +22,8 @@ export default function RootLayout({
       <body className={inter.className}>
         <CssBaseline />
 
-        {/* Navigation Panel */}
-        <AppBar position="static">
-          <Toolbar>
-            <Typography variant="h6" sx={{ flexGrow: 1 }}>
-              Mutual Fund Explorer
-            </Typography>
-
-            <Box sx={{ display: "flex", gap: 2 }}>
-              <Button color="inherit" component={Link} href="/funds">
-                Funds
-              </Button>
-
-              {/* Example: You can add more routes */}
-              <Button color="inherit" component={Link} href="/scheme/118834">
-                Sample Scheme
-              </Button>
-
-              <Button color="inherit" component={Link} href="/">
-                Home
-              </Button>
-            </Box>
-          </Toolbar>
-        </AppBar>
+        {/* Navigation Panel is now a separate Client Component */}
+        <Navbar />
 
         {/* Page content */}
         <main>{children}</main>
