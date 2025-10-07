@@ -1,7 +1,7 @@
 // src/components/RollingReturnCalculator.tsx
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
     TextField, Button, Typography, Stack, Divider, Box, useTheme,
     Paper, CircularProgress, alpha, MenuItem,
@@ -72,10 +72,6 @@ export default function RollingReturnCalculator({ code }: { code: string }) {
             setLoading(false);
         }
     };
-    
-    useEffect(() => {
-        handleCalculate();
-    }, [periodInYears]); // Recalculate when the period changes
 
     return (
         <Paper elevation={0} sx={{ width: "100%", borderRadius: 3, border: `1px solid ${theme.palette.divider}`, p: { xs: 2.5, sm: 4 } }}>
@@ -98,7 +94,7 @@ export default function RollingReturnCalculator({ code }: { code: string }) {
                     ))}
                 </TextField>
                 <Button variant="contained" size="large" onClick={handleCalculate} disabled={loading} startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <CalculateIcon />}>
-                    {loading ? "Calculating..." : "Recalculate"}
+                    {loading ? "Calculating..." : "Calculate"}
                 </Button>
             </Stack>
 

@@ -1,14 +1,30 @@
 // src/app/api/scheme/[code]/swp/route.ts
 import { NextResponse } from "next/server";
 import dayjs from "dayjs";
+import customParseFormat from "dayjs/plugin/customParseFormat";
 import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
+import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
 
+dayjs.extend(customParseFormat);
 dayjs.extend(isSameOrBefore);
+dayjs.extend(isSameOrAfter);
 
 interface NavData {
     date: string;
     nav: number;
     parsedDate: dayjs.Dayjs;
+}
+
+/**
+ * Finds the first available NAV on or AFTER a given date.
+ */
+function findNavForDate(sortedNavHistory: NavData[], targetDate: dayjs.Dayjs): NavData | null {
+    for (const entry of sortedNavHistory) {
+        if (entry.parsedDate.isSameOrAfter(targetDate, 'day')) {
+            return entry;
+        }
+    }
+    return sortedNavHistory.length > 0 ? sortedNavHistory[sortedNavHistory.length - 1] : null;
 }
 
 /**
@@ -21,20 +37,19 @@ function calculateHistoricalSWP(
     from: string,
     to: string
 ) {
-    const processedHistory = navHistory.sort((a, b) => a.parsedDate.unix() - b.parsedDate.unix());
+    const sortedHistory = navHistory.sort((a, b) => a.parsedDate.unix() - b.parsedDate.unix());
 
-    if (processedHistory.length < 1) {
-        return { totalInvested: 0, totalWithdrawn: 0, finalValue: 0, growthOverTime: [], corpusRanOut: false };
+    if (sortedHistory.length < 1) {
+        return { totalInvested: 0, totalWithdrawn: 0, finalValue: 0, growthOverTime: [], corpusRanOutDate: null };
     }
 
     const startDate = dayjs(from);
     const endDate = dayjs(to);
 
     // Find the NAV for the initial investment
-    const startNavEntry = processedHistory.find(d => !d.parsedDate.isBefore(startDate, 'day'));
+    const startNavEntry = findNavForDate(sortedHistory, startDate);
     if (!startNavEntry) {
-        // Cannot start the investment if no NAV is found
-        return { totalInvested: 0, totalWithdrawn: 0, finalValue: 0, growthOverTime: [], corpusRanOut: false };
+        throw new Error("Could not find a valid starting NAV for the selected investment date.");
     }
 
     let currentUnits = initialInvestment / startNavEntry.nav;
@@ -45,20 +60,20 @@ function calculateHistoricalSWP(
     growthOverTime.push({ date: startDate.format('YYYY-MM-DD'), value: initialInvestment });
 
     let withdrawalDate = startDate.add(1, 'month');
-    let corpusRanOut = false;
+    let corpusRanOutDate: string | null = null;
 
-    while (withdrawalDate.isBefore(endDate)) {
-        // Find the NAV for the withdrawal date
-        const navEntry = processedHistory.find(d => !d.parsedDate.isBefore(withdrawalDate, 'day'));
+    while (withdrawalDate.isSameOrBefore(endDate)) {
+        const navEntry = findNavForDate(sortedHistory, withdrawalDate);
 
         if (navEntry) {
+            const currentValue = currentUnits * navEntry.nav;
             const unitsToSell = monthlyWithdrawal / navEntry.nav;
 
-            if (currentUnits < unitsToSell) {
-                // Not enough units to sustain the withdrawal, corpus is depleted
-                totalWithdrawn += currentUnits * navEntry.nav; // Withdraw the remaining balance
+            if (currentValue < monthlyWithdrawal) {
+                // Not enough value to sustain the withdrawal, corpus is depleted
+                totalWithdrawn += currentValue;
                 currentUnits = 0;
-                corpusRanOut = true;
+                corpusRanOutDate = withdrawalDate.format('YYYY-MM-DD');
             } else {
                 currentUnits -= unitsToSell;
                 totalWithdrawn += monthlyWithdrawal;
@@ -66,22 +81,22 @@ function calculateHistoricalSWP(
             
             growthOverTime.push({
                 date: withdrawalDate.format('YYYY-MM-DD'),
-                value: Math.round(currentUnits * navEntry.nav),
+                value: parseFloat((currentUnits * navEntry.nav).toFixed(2)),
             });
         }
         
-        if (corpusRanOut) break;
+        if (corpusRanOutDate) break;
         withdrawalDate = withdrawalDate.add(1, 'month');
     }
 
-    const latestNav = processedHistory[processedHistory.length - 1].nav;
-    const finalValue = currentUnits * latestNav;
+    const finalNavEntry = findNavForDate(sortedHistory, endDate) || sortedHistory[sortedHistory.length - 1];
+    const finalValue = currentUnits * finalNavEntry.nav;
 
     return {
         totalInvested: initialInvestment,
-        totalWithdrawn,
-        finalValue,
-        corpusRanOut,
+        totalWithdrawn: parseFloat(totalWithdrawn.toFixed(2)),
+        finalValue: parseFloat(finalValue.toFixed(2)),
+        corpusRanOutDate,
         growthOverTime,
     };
 }
@@ -93,6 +108,7 @@ export async function POST(req: Request) {
         const code = codeMatch ? codeMatch[1] : null;
 
         if (!code) return NextResponse.json({ error: "Missing scheme code." }, { status: 400 });
+        if (!initialInvestment || !monthlyWithdrawal || !from || !to) return NextResponse.json({ error: "Missing required fields." }, { status: 400 });
 
         const res = await fetch(`https://api.mfapi.in/mf/${code}`);
         if (!res.ok) return NextResponse.json({ error: "Failed to fetch scheme data." }, { status: 502 });
@@ -111,8 +127,8 @@ export async function POST(req: Request) {
         const result = calculateHistoricalSWP(navHistory, initialInvestment, monthlyWithdrawal, from, to);
 
         return NextResponse.json(result);
-    } catch (error) {
+    } catch (error: any) {
         console.error("Error in SWP calculation:", error);
-        return NextResponse.json({ error: "An internal server error occurred." }, { status: 500 });
+        return NextResponse.json({ error: error.message || "An internal server error occurred." }, { status: 500 });
     }
 }

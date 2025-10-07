@@ -319,7 +319,9 @@ import SIPCalculator from "@/components/SIPCalculator";
 import HistoricalReturnsGrid from "@/components/HistoricalReturnsGrid";
 import SchemeHeader from "@/components/SchemeHeader";
 import LumpSumCalculator from "@/components/LumpSumCalculator";
-import RollingReturnCalculator from "@/components/RollingReturnCalculator"; // 1. Import the new component
+import RollingReturnCalculator from "@/components/RollingReturnCalculator";
+import SWPCalculator from "@/components/SWPCalculator";
+import StepUpSipCalculator from "@/components/StepUpSipCalculator";
 
 export default function SchemeDetailPage() {
   const { code } = useParams();
@@ -344,7 +346,6 @@ export default function SchemeDetailPage() {
   }, [code]);
 
   if (loading) {
-      // Your existing Skeleton/loading component
     return (
       <Container maxWidth="lg" sx={{ py: 4 }}>
         <Skeleton variant="rectangular" height={200} sx={{ borderRadius: 3, mb: 4 }} />
@@ -359,7 +360,6 @@ export default function SchemeDetailPage() {
   }
 
   if (!scheme) {
-      // Your existing error component
     return (
       <Container maxWidth="md" sx={{ py: 6, textAlign: "center" }}>
         <Typography variant="h6" color="error"> Fund not found or failed to load. </Typography>
@@ -396,7 +396,6 @@ export default function SchemeDetailPage() {
           <HistoricalReturnsGrid code={String(meta.schemeCode)} />
         </Grid>
         
-        {/* 2. Add the Rolling Return Calculator here */}
         <Grid item xs={12}>
             <RollingReturnCalculator code={String(meta.schemeCode)} />
         </Grid>
@@ -408,6 +407,14 @@ export default function SchemeDetailPage() {
             <Grid item xs={12} lg={6}>
                 <LumpSumCalculator code={String(meta.schemeCode)} />
             </Grid>
+        </Grid>
+
+        <Grid item xs={12} sx={{ mt: 2 }}>
+            <SWPCalculator code={String(meta.schemeCode)} />
+        </Grid>
+        
+        <Grid item xs={12} sx={{ mt: 2 }}>
+            <StepUpSipCalculator code={String(meta.schemeCode)} />
         </Grid>
         
       </Grid>
