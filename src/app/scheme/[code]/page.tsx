@@ -322,6 +322,7 @@ import LumpSumCalculator from "@/components/LumpSumCalculator";
 import RollingReturnCalculator from "@/components/RollingReturnCalculator";
 import SWPCalculator from "@/components/SWPCalculator";
 import StepUpSipCalculator from "@/components/StepUpSipCalculator";
+import StepUpSwpCalculator from "@/components/StepUpSwpCalculator"; // 1. Import the new component
 
 export default function SchemeDetailPage() {
   const { code } = useParams();
@@ -408,13 +409,18 @@ export default function SchemeDetailPage() {
                 <LumpSumCalculator code={String(meta.schemeCode)} />
             </Grid>
         </Grid>
+        
+        <Grid item xs={12} sx={{ mt: 2 }}>
+            <StepUpSipCalculator code={String(meta.schemeCode)} />
+        </Grid>
 
         <Grid item xs={12} sx={{ mt: 2 }}>
             <SWPCalculator code={String(meta.schemeCode)} />
         </Grid>
         
+        {/* 2. Add the new Step-up SWP Calculator */}
         <Grid item xs={12} sx={{ mt: 2 }}>
-            <StepUpSipCalculator code={String(meta.schemeCode)} />
+            <StepUpSwpCalculator code={String(meta.schemeCode)} />
         </Grid>
         
       </Grid>
