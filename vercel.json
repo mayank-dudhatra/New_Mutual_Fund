@@ -3,6 +3,10 @@
     {
       "path": "/api/sync-funds",
       "schedule": "0 7 * * *"
+    },
+    {
+      "path": "/api/cron/process-sips",
+      "schedule": "0 1 * * *" 
     }
   ]
 }
