@@ -196,6 +196,7 @@ export default function Navbar() {
               <Divider />
               <MenuItem onClick={handleProfile}>Profile</MenuItem>
               <MenuItem onClick={() => router.push('/watchlist')}>Watchlist</MenuItem>
+              <MenuItem onClick={() => router.push('/virtual-portfolio')}>Virtual Portfolio</MenuItem> 
               <Divider />
               <MenuItem onClick={handleLogout}>Logout</MenuItem>
             </Menu>

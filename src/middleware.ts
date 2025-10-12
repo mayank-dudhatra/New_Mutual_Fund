@@ -38,6 +38,7 @@ export const config = {
     '/scheme/:path*',
     '/watchlist/:path*',
     '/profile/:path*',
+    '/virtual-portfolio/:path*',
     '/login',
     '/register',
   ],
