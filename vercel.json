@@ -1,8 +1,8 @@
 {
-    "crons": [
-        {
-            "path": "/api/update-funds",
-            "schedule": "0 7 * * *"
-        }
-    ]
+  "crons": [
+    {
+      "path": "/api/sync-funds",
+      "schedule": "0 7 * * *"
+    }
+  ]
 }
