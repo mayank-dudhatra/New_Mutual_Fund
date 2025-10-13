@@ -310,9 +310,11 @@ import {
   Box,
   Skeleton,
   useTheme,
+  Button,
 } from "@mui/material";
+import AddIcon from '@mui/icons-material/Add';
 
-// Import all the custom components
+// Import all the necessary components for this page
 import InteractiveNavChart from "@/components/InteractiveNavChart";
 import ReturnsTable from "@/components/ReturnsTable";
 import SIPCalculator from "@/components/SIPCalculator";
@@ -322,12 +324,14 @@ import LumpSumCalculator from "@/components/LumpSumCalculator";
 import RollingReturnCalculator from "@/components/RollingReturnCalculator";
 import SWPCalculator from "@/components/SWPCalculator";
 import StepUpSipCalculator from "@/components/StepUpSipCalculator";
-import StepUpSwpCalculator from "@/components/StepUpSwpCalculator"; // 1. Import the new component
+import StepUpSwpCalculator from "@/components/StepUpSwpCalculator";
+import AddSipModal from "@/components/AddSipModal"; // Import the modal
 
 export default function SchemeDetailPage() {
   const { code } = useParams();
   const [scheme, setScheme] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isSipModalOpen, setSipModalOpen] = useState(false); // State to control the modal
   const theme = useTheme();
 
   useEffect(() => {
@@ -372,7 +376,25 @@ export default function SchemeDetailPage() {
 
   return (
     <Container maxWidth="xl" sx={{ py: { xs: 2, md: 4 } }}>
+      {/* Modal for adding a new Virtual SIP */}
+      <AddSipModal 
+        open={isSipModalOpen} 
+        onClose={() => setSipModalOpen(false)}
+        defaultSchemeCode={String(meta.schemeCode)}
+        defaultSchemeName={meta.schemeName}
+      />
       
+      <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2 }}>
+          <Typography variant="h4" fontWeight={700}>Fund Details</Typography>
+          <Button 
+            variant="contained" 
+            startIcon={<AddIcon />}
+            onClick={() => setSipModalOpen(true)}
+          >
+            Start Virtual SIP
+          </Button>
+      </Box>
+
       <Box sx={{ mb: 4 }}>
         <SchemeHeader meta={meta} navHistory={navHistory} />
       </Box>
@@ -418,7 +440,6 @@ export default function SchemeDetailPage() {
             <SWPCalculator code={String(meta.schemeCode)} />
         </Grid>
         
-        {/* 2. Add the new Step-up SWP Calculator */}
         <Grid item xs={12} sx={{ mt: 2 }}>
             <StepUpSwpCalculator code={String(meta.schemeCode)} />
         </Grid>

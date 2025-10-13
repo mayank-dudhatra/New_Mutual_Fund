@@ -51,7 +51,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    // FIX: Add suppressHydrationWarning to the <html> tag to ignore browser extension errors.
+    // FIX: Add suppressHydrationWarning to the <html> tag.
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
         <CssBaseline />
