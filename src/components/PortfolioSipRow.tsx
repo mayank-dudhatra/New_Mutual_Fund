@@ -99,6 +99,7 @@ export default function PortfolioSipRow({ sip, performance, onSipDeleted, onSipU
                         <MoreVertIcon />
                     </IconButton>
                     <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={() => setAnchorEl(null)}>
+                        <MenuItem component={Link} href={`/virtual-portfolio/${sip._id}`} onClick={() => setAnchorEl(null)}>View Details</MenuItem>
                         {sip.status === 'active' && <MenuItem onClick={() => handleAction('pause')}>Pause</MenuItem>}
                         {sip.status === 'paused' && <MenuItem onClick={() => handleAction('resume')}>Resume</MenuItem>}
                         {(sip.status === 'active' || sip.status === 'paused') && <MenuItem onClick={() => handleAction('cancel')}>Cancel SIP</MenuItem>}

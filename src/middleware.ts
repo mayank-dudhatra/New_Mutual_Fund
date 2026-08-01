@@ -9,7 +9,7 @@ export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Define protected routes that require authentication
-  const protectedPaths = ['/home', '/funds', '/scheme', '/watchlist', '/profile'];
+  const protectedPaths = ['/home', '/funds', '/scheme', '/watchlist', '/profile', '/virtual-portfolio'];
 
   const isProtected = protectedPaths.some(path => pathname.startsWith(path));
 

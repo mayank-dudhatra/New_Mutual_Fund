@@ -8,10 +8,40 @@ import { ObjectId } from "mongodb";
 const JWT_SECRET = process.env.JWT_SECRET || "fallback-secret";
 const TOKEN_NAME = "authToken";
 
+// GET handler to fetch a single virtual SIP along with its transaction history
+export async function GET(request: Request, { params }: { params: Promise<{ id: string }>}) {
+    const { id } = await params;
+    const cookieStore = await cookies();
+    const token = cookieStore.get(TOKEN_NAME);
+    if (!token) return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+
+    try {
+        const decoded = jwt.verify(token.value, JWT_SECRET) as { userId: string };
+        const userId = new ObjectId(decoded.userId);
+
+        const client = await clientPromise;
+        const db = client.db("mutualfund");
+        const portfolioCollection = db.collection("virtual_portfolio");
+
+        const sip = await portfolioCollection.findOne({ _id: new ObjectId(id), userId });
+        if (!sip) return NextResponse.json({ error: "SIP not found" }, { status: 404 });
+
+        const transactionCollection = db.collection("sip_transactions");
+        const transactions = await transactionCollection
+            .find({ sipId: new ObjectId(id), userId })
+            .sort({ transactionDate: 1 })
+            .toArray();
+
+        return NextResponse.json({ sip, transactions }, { status: 200 });
+    } catch (error) {
+        return NextResponse.json({ error: "Invalid token or server error" }, { status: 500 });
+    }
+}
+
 // DELETE handler to remove a virtual SIP
-export async function DELETE(request: Request, { params }: { params: { id: string }}) {
-    const { id } = params;
-    const cookieStore = cookies();
+export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }>}) {
+    const { id } = await params;
+    const cookieStore = await cookies();
     const token = cookieStore.get(TOKEN_NAME);
 
     if (!token) {
