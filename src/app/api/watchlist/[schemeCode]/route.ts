@@ -9,9 +9,9 @@ const JWT_SECRET = process.env.JWT_SECRET || "fallback-secret";
 const TOKEN_NAME = "authToken";
 
 // DELETE handler to remove an item from the watchlist
-export async function DELETE(request: Request, { params }: { params: { schemeCode: string }}) {
-    const { schemeCode } = params;
-    const cookieStore = cookies();
+export async function DELETE(request: Request, { params }: { params: Promise<{ schemeCode: string }> }) {
+    const { schemeCode } = await params;
+    const cookieStore = await cookies();
     const token = cookieStore.get(TOKEN_NAME);
 
     if (!token) {

@@ -6,14 +6,14 @@ export interface NAVEntry {
   nav: number;    // NAV value
 }
 
-// ✅ Mutual Fund Scheme metadata
+// ✅ Mutual Fund Scheme metadata (matches the shape returned by https://api.mfapi.in/mf)
 export interface Scheme {
-  code: string;          // Unique AMFI scheme code
-  name: string;          // Scheme name (e.g. SBI Bluechip Fund)
-  isin?: string;         // Optional ISIN (International Securities Identification Number)
-  category?: string;     // e.g. "Equity", "Debt", "Hybrid"
-  type?: string;         // e.g. "Open Ended", "Close Ended"
-  navHistory?: NAVEntry[]; // Optional NAV history
+  schemeCode: number;          // Unique AMFI scheme code
+  schemeName: string;          // Scheme name (e.g. SBI Bluechip Fund)
+  schemeType?: string;         // e.g. "Open Ended Schemes", "Close Ended Schemes"
+  isinGrowth?: string | null;  // ISIN for growth option (or null)
+  isinDivReinvestment?: string | null; // ISIN for dividend reinvestment option (or null)
+  isinDivPayout?: string | null;       // ISIN for dividend payout option (or null)
 }
 
 // ✅ Returns (absolute % for given time periods)

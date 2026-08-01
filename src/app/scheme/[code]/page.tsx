@@ -355,10 +355,10 @@ export default function SchemeDetailPage() {
       <Container maxWidth="lg" sx={{ py: 4 }}>
         <Skeleton variant="rectangular" height={200} sx={{ borderRadius: 3, mb: 4 }} />
         <Grid container spacing={4}>
-          <Grid item xs={12} md={8}> <Skeleton variant="rectangular" height={450} sx={{ borderRadius: 3 }} /> </Grid>
-          <Grid item xs={12} md={4}> <Skeleton variant="rectangular" height={450} sx={{ borderRadius: 3 }} /> </Grid>
-          <Grid item xs={12}> <Skeleton variant="rectangular" height={300} sx={{ borderRadius: 3, mt: 3 }} /> </Grid>
-          <Grid item xs={12}> <Skeleton variant="rectangular" height={400} sx={{ borderRadius: 3, mt: 3 }} /> </Grid>
+          <Grid size={{ xs: 12, md: 8 }}> <Skeleton variant="rectangular" height={450} sx={{ borderRadius: 3 }} /> </Grid>
+          <Grid size={{ xs: 12, md: 4 }}> <Skeleton variant="rectangular" height={450} sx={{ borderRadius: 3 }} /> </Grid>
+          <Grid size={12}> <Skeleton variant="rectangular" height={300} sx={{ borderRadius: 3, mt: 3 }} /> </Grid>
+          <Grid size={12}> <Skeleton variant="rectangular" height={400} sx={{ borderRadius: 3, mt: 3 }} /> </Grid>
         </Grid>
       </Container>
     );
@@ -401,7 +401,7 @@ export default function SchemeDetailPage() {
 
       <Grid container spacing={{ xs: 3, md: 4 }}>
         
-        <Grid item xs={12} lg={8}>
+        <Grid size={{ xs: 12, lg: 8 }}>
           <Card elevation={0} sx={{ borderRadius: 3, border: `1px solid ${theme.palette.divider}`, height: "100%" }}>
             <CardContent sx={{ pb: '32px !important' }}>
               <InteractiveNavChart data={navHistory} schemeName={meta.schemeName} />
@@ -409,38 +409,38 @@ export default function SchemeDetailPage() {
           </Card>
         </Grid>
 
-        <Grid item xs={12} lg={4}>
+        <Grid size={{ xs: 12, lg: 4 }}>
             <Typography variant="h6" fontWeight={600} gutterBottom> Point-to-Point Returns </Typography>
             <ReturnsTable code={String(meta.schemeCode)} />
         </Grid>
         
-        <Grid item xs={12}>
+        <Grid size={12}>
           <Typography variant="h6" fontWeight={600} gutterBottom sx={{ mt: 2 }}> Historical Monthly Returns </Typography>
           <HistoricalReturnsGrid code={String(meta.schemeCode)} />
         </Grid>
         
-        <Grid item xs={12}>
+        <Grid size={12}>
             <RollingReturnCalculator code={String(meta.schemeCode)} />
         </Grid>
 
-        <Grid item container xs={12} spacing={4} sx={{ mt: 2 }}>
-            <Grid item xs={12} lg={6}>
+        <Grid container size={12} spacing={4} sx={{ mt: 2 }}>
+            <Grid size={{ xs: 12, lg: 6 }}>
                 <SIPCalculator code={String(meta.schemeCode)} />
             </Grid>
-            <Grid item xs={12} lg={6}>
+            <Grid size={{ xs: 12, lg: 6 }}>
                 <LumpSumCalculator code={String(meta.schemeCode)} />
             </Grid>
         </Grid>
         
-        <Grid item xs={12} sx={{ mt: 2 }}>
+        <Grid size={12} sx={{ mt: 2 }}>
             <StepUpSipCalculator code={String(meta.schemeCode)} />
         </Grid>
 
-        <Grid item xs={12} sx={{ mt: 2 }}>
+        <Grid size={12} sx={{ mt: 2 }}>
             <SWPCalculator code={String(meta.schemeCode)} />
         </Grid>
         
-        <Grid item xs={12} sx={{ mt: 2 }}>
+        <Grid size={12} sx={{ mt: 2 }}>
             <StepUpSwpCalculator code={String(meta.schemeCode)} />
         </Grid>
         

@@ -98,9 +98,9 @@ export default function VirtualPortfolioPage() {
             {view === 'holdings' && (
                 <Paper sx={{ p: 3, borderRadius: 3, mb: 4 }}>
                   <Grid container spacing={2}>
-                    <Grid item xs={6} md={3} textAlign="center"><Typography variant="caption" color="text.secondary">Invested Value</Typography><Typography fontWeight={600}>{formatCurrency(holdingsSummary.totalInvested)}</Typography></Grid>
-                    <Grid item xs={6} md={3} textAlign="center"><Typography variant="caption" color="text.secondary">Current Value</Typography><Typography variant="h6" fontWeight={600}>{formatCurrency(holdingsSummary.totalCurrentValue)}</Typography></Grid>
-                    <Grid item xs={12} md={6} textAlign="center"><Typography variant="caption" color="text.secondary">Total P&L</Typography><Typography fontWeight={600} color={holdingsSummary.totalCurrentValue - holdingsSummary.totalInvested >= 0 ? 'success.main' : 'error.main'}>{formatCurrency(holdingsSummary.totalCurrentValue - holdingsSummary.totalInvested)}</Typography></Grid>
+                    <Grid size={{ xs: 6, md: 3 }} textAlign="center"><Typography variant="caption" color="text.secondary">Invested Value</Typography><Typography fontWeight={600}>{formatCurrency(holdingsSummary.totalInvested)}</Typography></Grid>
+                    <Grid size={{ xs: 6, md: 3 }} textAlign="center"><Typography variant="caption" color="text.secondary">Current Value</Typography><Typography variant="h6" fontWeight={600}>{formatCurrency(holdingsSummary.totalCurrentValue)}</Typography></Grid>
+                    <Grid size={{ xs: 12, md: 6 }} textAlign="center"><Typography variant="caption" color="text.secondary">Total P&L</Typography><Typography fontWeight={600} color={holdingsSummary.totalCurrentValue - holdingsSummary.totalInvested >= 0 ? 'success.main' : 'error.main'}>{formatCurrency(holdingsSummary.totalCurrentValue - holdingsSummary.totalInvested)}</Typography></Grid>
                   </Grid>
                 </Paper>
             )}
@@ -108,8 +108,8 @@ export default function VirtualPortfolioPage() {
             {view === 'history' && (
                  <Paper sx={{ p: 3, borderRadius: 3, mb: 4 }}>
                   <Grid container spacing={2}>
-                    <Grid item xs={6} textAlign="center"><Typography variant="caption" color="text.secondary">Total Invested</Typography><Typography fontWeight={600}>{formatCurrency(historySummary.totalInvested)}</Typography></Grid>
-                    <Grid item xs={6} textAlign="center"><Typography variant="caption" color="text.secondary">Total Profit/Loss</Typography><Typography fontWeight={600} color={totalPnlHistory >= 0 ? 'success.main' : 'error.main'}>{formatCurrency(totalPnlHistory)}</Typography></Grid>
+                    <Grid size={6} textAlign="center"><Typography variant="caption" color="text.secondary">Total Invested</Typography><Typography fontWeight={600}>{formatCurrency(historySummary.totalInvested)}</Typography></Grid>
+                    <Grid size={6} textAlign="center"><Typography variant="caption" color="text.secondary">Total Profit/Loss</Typography><Typography fontWeight={600} color={totalPnlHistory >= 0 ? 'success.main' : 'error.main'}>{formatCurrency(totalPnlHistory)}</Typography></Grid>
                   </Grid>
                 </Paper>
             )}
@@ -120,7 +120,7 @@ export default function VirtualPortfolioPage() {
                 ))}
                 {sips.length === 0 && !loading && (
                     <Typography color="text.secondary" sx={{ textAlign: 'center', p: 6, fontStyle: 'italic' }}>
-                        Your portfolio is empty. Click "Start a SIP" to add your first virtual investment.
+                        Your portfolio is empty. Click &quot;Start a SIP&quot; to add your first virtual investment.
                     </Typography>
                 )}
             </Box>

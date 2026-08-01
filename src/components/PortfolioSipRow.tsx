@@ -50,7 +50,7 @@ export default function PortfolioSipRow({ sip, performance, onSipDeleted, onSipU
     return (
         <Paper variant="outlined" sx={{ p: 2, mb: 2, borderRadius: 2 }}>
             <Grid container alignItems="center" spacing={1}>
-                <Grid item xs={12} md={4}>
+                <Grid size={{ xs: 12, md: 4 }}>
                     {/* FIX: Fund Name is now a clickable Link */}
                     <Link href={`/scheme/${sip.schemeCode}`} passHref style={{textDecoration: 'none'}}>
                         <Typography fontWeight={600} color="primary.main" sx={{ '&:hover': { textDecoration: 'underline' } }}>
@@ -65,16 +65,16 @@ export default function PortfolioSipRow({ sip, performance, onSipDeleted, onSipU
                     </Typography>
                 </Grid>
                 
-                <Grid item xs={6} md={2} textAlign={{xs: 'left', md: 'center'}}>
+                <Grid size={{ xs: 6, md: 2 }} textAlign={{ xs: 'left', md: 'center' }}>
                     <Typography variant="caption" color="text.secondary">Invested</Typography>
                     <Typography fontWeight={500}>{formatCurrency(sip.totalInvested)}</Typography>
                 </Grid>
-                <Grid item xs={6} md={2} textAlign={{xs: 'left', md: 'center'}}>
+                <Grid size={{ xs: 6, md: 2 }} textAlign={{ xs: 'left', md: 'center' }}>
                     <Typography variant="caption" color="text.secondary">Current Value</Typography>
                     <Typography fontWeight={500}>{formatCurrency(currentValue)}</Typography>
                 </Grid>
 
-                <Grid item xs={6} md={2} textAlign={{xs: 'left', md: 'center'}}>
+                <Grid size={{ xs: 6, md: 2 }} textAlign={{ xs: 'left', md: 'center' }}>
                     <Typography variant="caption" color="text.secondary">Total P&L</Typography>
                     <Typography fontWeight={500} color={pnl >= 0 ? 'success.main' : 'error.main'}>
                         {formatCurrency(pnl)}
@@ -83,7 +83,7 @@ export default function PortfolioSipRow({ sip, performance, onSipDeleted, onSipU
                         ({pnlPercent.toFixed(2)}%)
                     </Typography>
                 </Grid>
-                <Grid item xs={6} md={1} textAlign={{xs: 'left', md: 'center'}}>
+                <Grid size={{ xs: 6, md: 1 }} textAlign={{ xs: 'left', md: 'center' }}>
                     <Typography variant="caption" color="text.secondary">Day Chg.</Typography>
                      <Typography fontWeight={500} color={dayChangeValue >= 0 ? 'success.main' : 'error.main'}>
                         {formatCurrency(dayChangeValue)}
@@ -93,7 +93,7 @@ export default function PortfolioSipRow({ sip, performance, onSipDeleted, onSipU
                     </Typography>
                 </Grid>
 
-                <Grid item xs={12} md={1} textAlign="right">
+                <Grid size={{ xs: 12, md: 1 }} textAlign="right">
                     <Chip label={sip.status} color={statusColors[sip.status]} size="small" sx={{ textTransform: 'capitalize', display: {xs: 'none', md: 'flex'} }} />
                     <IconButton onClick={(e) => setAnchorEl(e.currentTarget)}>
                         <MoreVertIcon />
@@ -110,7 +110,7 @@ export default function PortfolioSipRow({ sip, performance, onSipDeleted, onSipU
                 </Grid>
 
                 {sip.durationMonths > 0 && !sip.redeemed && (
-                    <Grid item xs={12}>
+                    <Grid size={12}>
                         <Box sx={{ mt: 1 }}>
                             <Typography variant="caption" color="text.secondary">
                                 Progress: {sip.completedInstallments} / {sip.durationMonths} months

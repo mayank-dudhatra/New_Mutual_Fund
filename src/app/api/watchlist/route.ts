@@ -11,7 +11,7 @@ const TOKEN_NAME = "authToken";
 
 // GET handler to fetch the user's watchlist
 export async function GET() {
-  const cookieStore = cookies();
+  const cookieStore = await cookies();
   const token = cookieStore.get(TOKEN_NAME);
 
   if (!token) {
@@ -38,7 +38,7 @@ export async function GET() {
 
 // POST handler to add an item to the watchlist
 export async function POST(request: Request) {
-  const cookieStore = cookies();
+  const cookieStore = await cookies();
   const token = cookieStore.get(TOKEN_NAME);
 
   if (!token) {

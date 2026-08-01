@@ -83,6 +83,7 @@ import { useRouter } from 'next/navigation';
 
 interface User {
   userId: string; // The property name from the JWT payload
+  id?: string;    // Alias returned by the login response
   email: string;
   name: string;
 }

@@ -4,7 +4,7 @@ import { getScheme } from "@/lib/api";
 import { parseISO, differenceInDays } from "date-fns";
 
 interface Params {
-  params: { code: string };
+  params: Promise<{ code: string }>;
 }
 
 function calculateReturns(navHistory: { date: string; nav: number }[], from: string, to: string) {
@@ -25,7 +25,7 @@ function calculateReturns(navHistory: { date: string; nav: number }[], from: str
 
 export async function GET(req: Request, { params }: Params) {
   try {
-    const { code } = params;
+    const { code } = await params;
     const url = new URL(req.url);
     const period = url.searchParams.get("period");
     const from = url.searchParams.get("from");

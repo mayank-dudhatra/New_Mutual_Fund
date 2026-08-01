@@ -66,7 +66,7 @@ export default function LoginPage() {
           </Button>
            <Link href="/register" passHref>
               <Button fullWidth variant="outlined">
-                Don't have an account? Sign Up
+                Don&apos;t have an account? Sign Up
               </Button>
             </Link>
         </Box>

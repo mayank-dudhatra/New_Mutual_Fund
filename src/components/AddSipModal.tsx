@@ -81,16 +81,16 @@ export default function AddSipModal({ open, onClose, defaultSchemeCode = '', def
         <Typography variant="h6" gutterBottom>Start a New Virtual SIP</Typography>
         <Box component="form" onSubmit={handleSubmit} noValidate>
           <Grid container spacing={2}>
-              <Grid item xs={12}>
+              <Grid size={12}>
                   <TextField label="Scheme Code" required fullWidth value={schemeCode} onChange={(e) => setSchemeCode(e.target.value)} disabled={!!defaultSchemeCode} />
               </Grid>
-              <Grid item xs={12}>
+              <Grid size={12}>
                   <TextField label="Monthly SIP Amount" type="number" required fullWidth value={sipAmount} onChange={(e) => setSipAmount(e.target.value)} InputProps={{ startAdornment: <InputAdornment position="start">₹</InputAdornment> }} />
               </Grid>
-              <Grid item xs={12} sm={6}>
+              <Grid size={{ xs: 12, sm: 6 }}>
                   <TextField label="Start Date" type="date" required fullWidth value={startDate} onChange={(e) => setStartDate(e.target.value)} InputLabelProps={{ shrink: true }} />
               </Grid>
-              <Grid item xs={12} sm={6}>
+              <Grid size={{ xs: 12, sm: 6 }}>
                   <TextField select label="Duration" fullWidth value={duration} onChange={(e) => setDuration(e.target.value)}>
                       <MenuItem value="0">Until Cancelled</MenuItem>
                       <MenuItem value="12">1 Year</MenuItem>

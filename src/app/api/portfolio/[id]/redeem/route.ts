@@ -9,9 +9,9 @@ import { VirtualSip } from "@/models/VirtualPortfolio";
 const JWT_SECRET = process.env.JWT_SECRET || "fallback-secret";
 const TOKEN_NAME = "authToken";
 
-export async function POST(request: Request, { params }: { params: { id: string }}) {
-    const { id } = params;
-    const cookieStore = cookies();
+export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
+    const { id } = await params;
+    const cookieStore = await cookies();
     const token = cookieStore.get(TOKEN_NAME);
     if (!token) return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
 

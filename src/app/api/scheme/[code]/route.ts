@@ -3,12 +3,12 @@ import { NextResponse } from "next/server";
 import { getScheme } from "@/lib/api";
 
 interface Params {
-  params: { code: string };
+  params: Promise<{ code: string }>;
 }
 
 export async function GET(req: Request, { params }: Params) {
   try {
-    const { code } = params;
+    const { code } = await params;
     const scheme = await getScheme(code);
 
     // Transform NAV history: keep only date + nav as number
