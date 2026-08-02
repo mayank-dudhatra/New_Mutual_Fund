@@ -6,16 +6,22 @@ import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import { AreaChart, Area, ResponsiveContainer, YAxis, XAxis, Tooltip } from "recharts";
-import CandlestickChartIcon from "@mui/icons-material/CandlestickChart";
-import SearchIcon from "@mui/icons-material/Search";
-import CalculateIcon from "@mui/icons-material/Calculate";
-import TrackChangesIcon from "@mui/icons-material/TrackChanges";
-import TrendingUpIcon from "@mui/icons-material/TrendingUp";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import TickerTape from "@/components/TickerTape";
 import ReturnBadge from "@/components/ReturnBadge";
 import { useDashboard } from "@/hooks/useDashboard";
 import { formatCurrency } from "@/lib/utils";
+import PlatformOverview from "@/components/landing/PlatformOverview";
+import KeyFeatures from "@/components/landing/KeyFeatures";
+import HowItWorks from "@/components/landing/HowItWorks";
+import PlatformStats from "@/components/landing/PlatformStats";
+import WhyVirtualPortfolio from "@/components/landing/WhyVirtualPortfolio";
+import CalculatorsOverview from "@/components/landing/CalculatorsOverview";
+import Screenshots from "@/components/landing/Screenshots";
+import Technology from "@/components/landing/Technology";
+import FaqSection from "@/components/landing/FaqSection";
+import FinalCta from "@/components/landing/FinalCta";
+import LandingFooter from "@/components/landing/LandingFooter";
 
 // Deterministic, market-like equity curve for the hero chart (UI-only).
 const HERO_CHART_DATA = [
@@ -31,29 +37,6 @@ const HERO_CHART_DATA = [
   { x: "Oct", v: 1476 }, { x: "", v: 1503 }, { x: "", v: 1489 }, { x: "", v: 1525 },
   { x: "Nov", v: 1541 }, { x: "", v: 1578 }, { x: "", v: 1562 }, { x: "", v: 1601 },
   { x: "Dec", v: 1589 }, { x: "", v: 1627 }, { x: "", v: 1654 }, { x: "", v: 1689 },
-];
-
-const FEATURES = [
-  {
-    icon: SearchIcon,
-    title: "Explore every fund",
-    description: "Deep-dive into NAV history, returns and performance for thousands of mutual funds.",
-  },
-  {
-    icon: CalculateIcon,
-    title: "Powerful calculators",
-    description: "SIP, Step-up SIP, SWP, Lump Sum and rolling-return calculators with real fund data.",
-  },
-  {
-    icon: TrackChangesIcon,
-    title: "Build your watchlist",
-    description: "Track the funds you care about and spot movers at a glance.",
-  },
-  {
-    icon: TrendingUpIcon,
-    title: "Virtual portfolio",
-    description: "Simulate SIPs and watch your investments grow without risking a rupee.",
-  },
 ];
 
 export default function LandingPage() {
@@ -361,94 +344,38 @@ export default function LandingPage() {
 
       <Divider />
 
-      {/* ============ FEATURES ============ */}
-      <Container maxWidth="lg" sx={{ py: { xs: 5, md: 8 } }}>
-        <Typography variant="h4" fontWeight={800} sx={{ mb: 1, textAlign: "center" }}>
-          Everything you need to invest smarter
-        </Typography>
-        <Typography variant="body1" color="text.secondary" sx={{ mb: 5, textAlign: "center" }}>
-          Designed for investors who like to understand their money.
-        </Typography>
+      {/* ============ PLATFORM OVERVIEW ============ */}
+      <PlatformOverview />
 
-        <Grid container spacing={{ xs: 2, md: 3 }}>
-          {FEATURES.map((feature) => {
-            const Icon = feature.icon;
-            return (
-              <Grid key={feature.title} size={{ xs: 12, sm: 6, md: 3 }}>
-                <Paper
-                  variant="outlined"
-                  sx={{
-                    p: 3,
-                    height: "100%",
-                    transition: "box-shadow 0.2s ease, transform 0.2s ease",
-                    "&:hover": { boxShadow: "0 12px 32px rgba(15, 23, 42, 0.1)", transform: "translateY(-4px)" },
-                  }}
-                >
-                  <Box
-                    sx={{
-                      width: 46,
-                      height: 46,
-                      borderRadius: 2.5,
-                      mb: 2,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      bgcolor: alpha(theme.palette.primary.main, 0.1),
-                      color: "primary.main",
-                    }}
-                  >
-                    <Icon />
-                  </Box>
-                  <Typography variant="subtitle1" fontWeight={700} sx={{ mb: 1 }}>
-                    {feature.title}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    {feature.description}
-                  </Typography>
-                </Paper>
-              </Grid>
-            );
-          })}
-        </Grid>
-      </Container>
+      {/* ============ KEY FEATURES ============ */}
+      <KeyFeatures />
 
-      {/* ============ CTA BAND ============ */}
-      <Box sx={{ bgcolor: alpha(theme.palette.primary.main, 0.06), borderTop: `1px solid ${theme.palette.divider}` }}>
-        <Container maxWidth="md" sx={{ py: { xs: 5, md: 7 }, textAlign: "center" }}>
-          <Box
-            sx={{
-              width: 60,
-              height: 60,
-              mx: "auto",
-              mb: 2,
-              borderRadius: 3,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              background: "linear-gradient(135deg, #6C63FF 0%, #5549E0 100%)",
-              color: "#fff",
-              boxShadow: "0 16px 40px rgba(108, 99, 255, 0.35)",
-            }}
-          >
-            <CandlestickChartIcon sx={{ fontSize: 32 }} />
-          </Box>
-          <Typography variant="h4" fontWeight={800} sx={{ mb: 1 }}>
-            Ready to start tracking like the pros?
-          </Typography>
-          <Typography variant="body1" color="text.secondary" sx={{ mb: 3, maxWidth: 520, mx: "auto" }}>
-            Join free, build your watchlist, simulate SIPs and explore the full fund universe — no
-            KYC, no risk, no spam.
-          </Typography>
-          <Box sx={{ display: "flex", justifyContent: "center", gap: 2, flexWrap: "wrap" }}>
-            <Button variant="contained" size="large" component={Link} href="/register" sx={{ px: 4 }}>
-              Get Started Free
-            </Button>
-            <Button variant="outlined" size="large" component={Link} href="/login" sx={{ px: 4 }}>
-              Login
-            </Button>
-          </Box>
-        </Container>
-      </Box>
+      {/* ============ HOW IT WORKS ============ */}
+      <HowItWorks />
+
+      {/* ============ PLATFORM STATISTICS ============ */}
+      <PlatformStats />
+
+      {/* ============ WHY VIRTUAL PORTFOLIO ============ */}
+      <WhyVirtualPortfolio />
+
+      {/* ============ INVESTMENT CALCULATORS ============ */}
+      <CalculatorsOverview />
+
+      {/* ============ APPLICATION SCREENSHOTS ============ */}
+      <Screenshots />
+
+      {/* ============ TECHNOLOGY ============ */}
+      <Technology />
+
+      {/* ============ FAQ ============ */}
+      <FaqSection />
+
+      {/* ============ FINAL CTA ============ */}
+      <FinalCta />
+
+      {/* ============ FOOTER ============ */}
+      <LandingFooter />
     </Box>
   );
 }

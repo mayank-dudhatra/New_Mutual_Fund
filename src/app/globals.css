@@ -17,3 +17,24 @@ body {
 .tabular-nums {
   font-variant-numeric: tabular-nums;
 }
+
+/* Smooth scrolling for in-page anchor links */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Offset anchored sections below the sticky navbar */
+.anchor-section {
+  scroll-margin-top: 88px;
+}
+
+/* Pulsing live indicator used in the landing hero */
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
+  }
+}

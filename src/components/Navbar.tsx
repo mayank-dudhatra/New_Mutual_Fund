@@ -28,12 +28,19 @@ import StarIcon from "@mui/icons-material/Star";
 import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet";
 import PersonIcon from "@mui/icons-material/Person";
 import LogoutIcon from "@mui/icons-material/Logout";
+import MenuIcon from "@mui/icons-material/Menu";
 
 const NAV_ITEMS = [
   { label: "Home", href: "/home", icon: HomeIcon },
   { label: "Funds", href: "/funds", icon: SearchIcon },
   { label: "Watchlist", href: "/watchlist", icon: StarIcon },
   { label: "Portfolio", href: "/virtual-portfolio", icon: AccountBalanceWalletIcon },
+];
+
+const LANDING_LINKS = [
+  { label: "Features", id: "features" },
+  { label: "How It Works", id: "how-it-works" },
+  { label: "FAQ", id: "faq" },
 ];
 
 export default function Navbar() {
@@ -169,6 +176,70 @@ export default function Navbar() {
               <MenuItem onClick={handleLogout} sx={{ color: "error.main" }}>
                 <ListItemIcon sx={{ color: "error.main" }}><LogoutIcon fontSize="small" /></ListItemIcon>
                 Logout
+              </MenuItem>
+            </Menu>
+          </>
+        ) : pathname === "/" ? (
+          <>
+            {/* Landing anchor links (desktop) */}
+            <Box sx={{ display: { xs: "none", md: "flex" }, alignItems: "center", gap: 0.5 }}>
+              {LANDING_LINKS.map((item) => (
+                <Button
+                  key={item.id}
+                  component="a"
+                  href={`#${item.id}`}
+                  sx={{
+                    color: "text.secondary",
+                    fontWeight: 600,
+                    borderRadius: 2,
+                    px: 1.75,
+                    "&:hover": { bgcolor: "action.hover", color: "text.primary" },
+                  }}
+                >
+                  {item.label}
+                </Button>
+              ))}
+            </Box>
+
+            {/* Landing auth buttons (desktop) */}
+            <Box sx={{ display: { xs: "none", md: "flex" }, gap: 1, ml: 1 }}>
+              <Button component={Link} href="/login" variant="outlined" size="small">
+                Login
+              </Button>
+              <Button component={Link} href="/register" variant="contained" size="small">
+                Get Started
+              </Button>
+            </Box>
+
+            {/* Landing mobile menu */}
+            <IconButton
+              aria-label="landing menu"
+              onClick={handleMenu}
+              size="small"
+              sx={{ display: { xs: "inline-flex", md: "none" } }}
+            >
+              <MenuIcon />
+            </IconButton>
+            <Menu
+              anchorEl={anchorEl}
+              id="landing-menu"
+              open={open}
+              onClose={handleClose}
+              onClick={handleClose}
+              transformOrigin={{ horizontal: "right", vertical: "top" }}
+              anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
+            >
+              {LANDING_LINKS.map((item) => (
+                <MenuItem key={item.id} component="a" href={`#${item.id}`}>
+                  {item.label}
+                </MenuItem>
+              ))}
+              <Divider />
+              <MenuItem component={Link} href="/login">
+                Login
+              </MenuItem>
+              <MenuItem component={Link} href="/register">
+                Get Started
               </MenuItem>
             </Menu>
           </>
