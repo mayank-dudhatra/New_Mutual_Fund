@@ -35,6 +35,7 @@
 import "./globals.css";
 import { Inter } from "next/font/google";
 import { CssBaseline } from "@mui/material";
+import AppThemeProvider from "@/theme/ThemeProvider";
 import Navbar from "@/components/Navbar";
 import { AuthProvider } from "@/context/AuthContext";
 import Providers from "./providers";
@@ -55,15 +56,17 @@ export default function RootLayout({
     // FIX: Add suppressHydrationWarning to the <html> tag.
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
-        <CssBaseline />
-        {/* Providers persists across client-side navigation so cached
-            query/portfolio data is reused instead of refetched */}
-        <Providers>
-          <AuthProvider>
-            <Navbar />
-            <main>{children}</main>
-          </AuthProvider>
-        </Providers>
+        <AppThemeProvider>
+          <CssBaseline />
+          {/* Providers persists across client-side navigation so cached
+              query/portfolio data is reused instead of refetched */}
+          <Providers>
+            <AuthProvider>
+              <Navbar />
+              <main>{children}</main>
+            </AuthProvider>
+          </Providers>
+        </AppThemeProvider>
       </body>
     </html>
   );

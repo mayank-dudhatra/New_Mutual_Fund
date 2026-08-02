@@ -118,7 +118,7 @@ const ChartRenderer = ({ data, theme, isFullScreen = false }: { data: any[], the
       <Line
         type="monotone"
         dataKey="nav"
-        stroke={theme.palette.warning.main} // Orange color
+        stroke={theme.palette.success.main} // Market green
         strokeWidth={2.5}
         dot={false}
         activeDot={{ r: 6 }}

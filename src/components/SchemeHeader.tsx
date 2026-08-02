@@ -168,8 +168,9 @@
 "use client";
 
 import { useMemo, useState, useEffect } from "react";
-import { Box, Chip, Grid, Paper, Typography, alpha, useTheme, Divider, Stack, Avatar, Button, CircularProgress } from "@mui/material";
-import { ArrowUpward, TrendingUp, Add as AddIcon, Check as CheckIcon } from "@mui/icons-material";
+import { Box, Chip, Paper, Typography, useTheme, Divider, Stack, Avatar, Button, CircularProgress } from "@mui/material";
+import { Add as AddIcon, Check as CheckIcon } from "@mui/icons-material";
+import ReturnBadge from "./ReturnBadge";
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
 import { calculateCAGR } from "@/lib/utils";
@@ -326,10 +327,7 @@ export default function SchemeHeader({ meta, navHistory }: SchemeHeaderProps) {
         {fiveYearReturn && (
           <Box textAlign="center">
             <Typography variant="body2" color="text.secondary" gutterBottom>5 Year Absolute Returns</Typography>
-            <Box sx={{ display: 'flex', alignItems: 'center', color: 'success.main' }}>
-              <Typography variant="h6" fontWeight="700">{fiveYearReturn}%</Typography>
-              <ArrowUpward sx={{ fontSize: '1.2rem', ml: 0.5 }} />
-            </Box>
+            <ReturnBadge value={parseFloat(fiveYearReturn)} variant="h6" fontWeight={700} />
           </Box>
         )}
         <Box textAlign="center">
@@ -339,19 +337,13 @@ export default function SchemeHeader({ meta, navHistory }: SchemeHeaderProps) {
         {oneDayChange && (
           <Box textAlign="center">
             <Typography variant="body2" color="text.secondary">1 Day NAV Change</Typography>
-             <Box sx={{ display: 'flex', alignItems: 'center', color: parseFloat(oneDayChange) >= 0 ? 'success.main' : 'error.main' }}>
-              <Typography variant="h6" fontWeight="700">{`${parseFloat(oneDayChange) > 0 ? '+' : ''}${oneDayChange}%`}</Typography>
-              <ArrowUpward sx={{ fontSize: '1.2rem', ml: 0.5 }} />
-            </Box>
+            <ReturnBadge value={parseFloat(oneDayChange)} variant="h6" fontWeight={700} />
           </Box>
         )}
         {cagr && (
             <Box textAlign="center">
                 <Typography variant="body2" color="text.secondary" gutterBottom>CAGR</Typography>
-                <Box sx={{ display: 'flex', alignItems: 'center', color: 'success.main' }}>
-                <Typography variant="h6" fontWeight="700">{cagr}%</Typography>
-                <TrendingUp sx={{ fontSize: '1.2rem', ml: 0.5 }} />
-                </Box>
+                <ReturnBadge value={parseFloat(cagr)} variant="h6" fontWeight={700} />
             </Box>
         )}
       </Stack>
