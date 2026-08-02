@@ -130,7 +130,7 @@
 // src/components/FundListItem.tsx
 "use client";
 
-import { useState, useEffect } from "react";
+import { useMemo } from "react";
 import {
   Typography,
   Box,
@@ -146,23 +146,24 @@ import { Scheme } from "@/types/scheme";
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
 import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
+import { useSchemeDetails } from "@/hooks/useSchemeDetails";
 
 dayjs.extend(customParseFormat);
 dayjs.extend(isSameOrAfter);
 
 
 // Helper to get a color based on return value
-const getReturnColor = (returnValue: number | null, theme: any) => {
-  if (returnValue === null || isNaN(returnValue)) return theme.palette.text.secondary;
+const getReturnColor = (returnValue: number | null | undefined, theme: any) => {
+  if (returnValue == null || isNaN(returnValue)) return theme.palette.text.secondary;
   return returnValue > 0 ? theme.palette.success.main : theme.palette.error.main;
 };
 
 // A small component for displaying return values
-const ReturnValue = ({ value }: { value: number | null }) => {
+const ReturnValue = ({ value }: { value: number | null | undefined }) => {
   const theme = useTheme();
   const color = getReturnColor(value, theme);
 
-  if (value === null || isNaN(value)) {
+  if (value == null || isNaN(value)) {
     return (
       <Typography variant="body2" color="text.secondary">
         N/A
@@ -179,66 +180,48 @@ const ReturnValue = ({ value }: { value: number | null }) => {
 
 export default function FundListItem({ fund }: { fund: Scheme }) {
   const theme = useTheme();
-  const [details, setDetails] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+  const { data, isLoading: loading } = useSchemeDetails(fund.schemeCode);
+  const navHistory = data?.navHistory;
 
-  useEffect(() => {
-    async function fetchDetails() {
-      setLoading(true);
-      try {
-        const res = await fetch(`/api/scheme/${fund.schemeCode}`);
-        if (!res.ok) throw new Error("Failed to fetch");
-        
-        const data = await res.json();
-        const navHistory = data.navHistory;
+  const details = useMemo(() => {
+    if (!navHistory || navHistory.length <= 1) return null;
 
-        if (navHistory && navHistory.length > 1) {
-          const sortedHistory = navHistory
-            .map((d: any) => ({
-              nav: parseFloat(d.nav),
-              parsedDate: dayjs(d.date, "DD-MM-YYYY"),
-            }))
-            .sort((a: any, b: any) => a.parsedDate.unix() - b.parsedDate.unix());
+    const sortedHistory = navHistory
+      .map((d) => ({
+        nav: d.nav,
+        parsedDate: dayjs(d.date, "DD-MM-YYYY"),
+      }))
+      .sort((a, b) => a.parsedDate.unix() - b.parsedDate.unix());
 
-          const latestEntry = sortedHistory[sortedHistory.length - 1];
-          const latestNav = latestEntry.nav;
-          const latestDate = latestEntry.parsedDate;
+    const latestEntry = sortedHistory[sortedHistory.length - 1];
+    const latestNav = latestEntry.nav;
+    const latestDate = latestEntry.parsedDate;
 
-          const calculateReturn = (years: number) => {
-            const targetDate = latestDate.subtract(years, 'year');
-            const startEntry = sortedHistory.find((entry: any) =>
-              entry.parsedDate.isSameOrAfter(targetDate)
-            );
+    const calculateReturn = (years: number) => {
+      const targetDate = latestDate.subtract(years, 'year');
+      const startEntry = sortedHistory.find((entry) =>
+        entry.parsedDate.isSameOrAfter(targetDate)
+      );
 
-            if (!startEntry || startEntry.parsedDate.isSame(latestDate, 'day')) return null;
+      if (!startEntry || startEntry.parsedDate.isSame(latestDate, 'day')) return null;
 
-            const yearsDiff = latestDate.diff(startEntry.parsedDate, 'year', true);
-            if (yearsDiff <= 0) return null;
+      const yearsDiff = latestDate.diff(startEntry.parsedDate, 'year', true);
+      if (yearsDiff <= 0) return null;
 
-            // CAGR formula for annualized return
-            return (Math.pow(latestNav / startEntry.nav, 1 / yearsDiff) - 1) * 100;
-          };
+      // CAGR formula for annualized return
+      return (Math.pow(latestNav / startEntry.nav, 1 / yearsDiff) - 1) * 100;
+    };
 
-          const inceptionDate = sortedHistory[0].parsedDate;
-          const yearsSinceInception = latestDate.diff(inceptionDate, 'year', true);
+    const inceptionDate = sortedHistory[0].parsedDate;
+    const yearsSinceInception = latestDate.diff(inceptionDate, 'year', true);
 
-          setDetails({
-            latestNav: latestNav,
-            oneYearReturn: calculateReturn(1),
-            threeYearReturn: calculateReturn(3),
-            cagr: yearsSinceInception > 0 ? (Math.pow(latestNav / sortedHistory[0].nav, 1 / yearsSinceInception) - 1) * 100 : null,
-          });
-        }
-      } catch (error) {
-        console.error(`Failed to fetch details for ${fund.schemeCode}`, error);
-        setDetails(null); // Ensure details are null on error
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    fetchDetails();
-  }, [fund.schemeCode]);
+    return {
+      latestNav,
+      oneYearReturn: calculateReturn(1),
+      threeYearReturn: calculateReturn(3),
+      cagr: yearsSinceInception > 0 ? (Math.pow(latestNav / sortedHistory[0].nav, 1 / yearsSinceInception) - 1) * 100 : null,
+    };
+  }, [navHistory]);
 
   let category = "Equity";
   const lowerCaseName = fund.schemeName.toLowerCase();

@@ -299,8 +299,9 @@
 // src/app/scheme/[code]/page.tsx
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useParams } from "next/navigation";
+import { useSchemeDetails } from "@/hooks/useSchemeDetails";
 import {
   Container,
   Typography,
@@ -329,26 +330,10 @@ import AddSipModal from "@/components/AddSipModal"; // Import the modal
 
 export default function SchemeDetailPage() {
   const { code } = useParams();
-  const [scheme, setScheme] = useState<any | null>(null);
-  const [loading, setLoading] = useState(true);
+  const codeParam = Array.isArray(code) ? code[0] : code;
+  const { data: scheme, isLoading: loading } = useSchemeDetails(codeParam ?? "", !!codeParam);
   const [isSipModalOpen, setSipModalOpen] = useState(false); // State to control the modal
   const theme = useTheme();
-
-  useEffect(() => {
-    if (code) {
-      setLoading(true);
-      fetch(`/api/scheme/${code}`)
-        .then((res) => res.json())
-        .then((data) => {
-          setScheme(data);
-          setLoading(false);
-        })
-        .catch(() => {
-            console.error("Failed to fetch scheme details");
-            setLoading(false)
-        });
-    }
-  }, [code]);
 
   if (loading) {
     return (

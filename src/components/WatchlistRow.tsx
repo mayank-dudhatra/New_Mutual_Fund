@@ -111,7 +111,7 @@
 // src/components/WatchlistRow.tsx
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useMemo } from 'react';
 import { TableRow, TableCell, Typography, Skeleton, useTheme, IconButton } from '@mui/material';
 import Link from 'next/link';
 import dayjs from 'dayjs';
@@ -119,13 +119,16 @@ import customParseFormat from 'dayjs/plugin/customParseFormat';
 import isSameOrBefore from 'dayjs/plugin/isSameOrBefore'; // <-- FIX #1: IMPORT THE PLUGIN
 import DeleteIcon from '@mui/icons-material/Delete';
 import { WatchlistItem } from '@/models/Watchlist';
+import { useSchemeDetails } from '@/hooks/useSchemeDetails';
+import { useQueryClient } from '@tanstack/react-query';
+import { WATCHLIST_KEY } from '@/hooks/useWatchlist';
 
 dayjs.extend(customParseFormat);
 dayjs.extend(isSameOrBefore); // <-- FIX #2: USE THE PLUGIN
 
-const ReturnValue = ({ value }: { value: number | null }) => {
+const ReturnValue = ({ value }: { value: number | null | undefined }) => {
     const theme = useTheme();
-    if (value === null || isNaN(value)) {
+    if (value == null || isNaN(value)) {
         return <Typography variant="body2" color="text.secondary">N/A</Typography>;
     }
     const color = value >= 0 ? theme.palette.success.main : theme.palette.error.main;
@@ -134,53 +137,40 @@ const ReturnValue = ({ value }: { value: number | null }) => {
 };
 
 export default function WatchlistRow({ item }: { item: WatchlistItem }) {
-    const [returns, setReturns] = useState<any>(null);
-    const [loading, setLoading] = useState(true);
+    const queryClient = useQueryClient();
+    const { data, isLoading: loading } = useSchemeDetails(item.schemeCode);
+    const navHistory = data?.navHistory;
 
-    useEffect(() => {
-        async function fetchReturns() {
-            setLoading(true);
-            try {
-                const res = await fetch(`/api/scheme/${item.schemeCode}`);
-                const data = await res.json();
-                const navHistory = data.navHistory;
+    const returns = useMemo(() => {
+        if (!navHistory || navHistory.length <= 1) return null;
 
-                if (navHistory && navHistory.length > 1) {
-                    const history = navHistory.map((d: any) => ({
-                        nav: parseFloat(d.nav),
-                        date: dayjs(d.date, "DD-MM-YYYY"),
-                    })).sort((a: any, b: any) => b.date.unix() - a.date.unix()); // Sort newest to oldest
+        const history = navHistory.map((d) => ({
+            nav: d.nav,
+            date: dayjs(d.date, "DD-MM-YYYY"),
+        })).sort((a, b) => b.date.unix() - a.date.unix()); // Sort newest to oldest
 
-                    const latestEntry = history[0];
-                    
-                    const calculateChange = (duration: number, unit: 'day' | 'month' | 'year') => {
-                        const targetDate = latestEntry.date.subtract(duration, unit);
-                        
-                        // FIX #3: Find the first entry ON OR BEFORE the target date
-                        const startEntry = history.find((entry: any) => entry.date.isSameOrBefore(targetDate));
+        const latestEntry = history[0];
 
-                        if (!startEntry) return null;
+        const calculateChange = (duration: number, unit: 'day' | 'month' | 'year') => {
+            const targetDate = latestEntry.date.subtract(duration, unit);
 
-                        return ((latestEntry.nav - startEntry.nav) / startEntry.nav) * 100;
-                    };
+            // FIX #3: Find the first entry ON OR BEFORE the target date
+            const startEntry = history.find((entry) => entry.date.isSameOrBefore(targetDate));
 
-                    setReturns({
-                        '1D': ((latestEntry.nav - history[1].nav) / history[1].nav) * 100,
-                        '1M': calculateChange(1, 'month'),
-                        '3M': calculateChange(3, 'month'),
-                        '6M': calculateChange(6, 'month'),
-                        '1Y': calculateChange(1, 'year'),
-                    });
-                }
-            } catch (error) {
-                console.error("Failed to fetch returns for watchlist item", error);
-            } finally {
-                setLoading(false);
-            }
-        }
-        fetchReturns();
-    }, [item.schemeCode]);
-    
+            if (!startEntry) return null;
+
+            return ((latestEntry.nav - startEntry.nav) / startEntry.nav) * 100;
+        };
+
+        return {
+            '1D': ((latestEntry.nav - history[1].nav) / history[1].nav) * 100,
+            '1M': calculateChange(1, 'month'),
+            '3M': calculateChange(3, 'month'),
+            '6M': calculateChange(6, 'month'),
+            '1Y': calculateChange(1, 'year'),
+        };
+    }, [navHistory]);
+
     const handleRemove = async () => {
         const row = document.getElementById(`watchlist-row-${item.schemeCode}`);
         if (row) row.style.display = 'none';
@@ -188,6 +178,9 @@ export default function WatchlistRow({ item }: { item: WatchlistItem }) {
         await fetch(`/api/watchlist/${item.schemeCode}`, {
             method: 'DELETE',
         });
+
+        // Refresh the cached watchlist so the row stays consistent on next visit.
+        queryClient.invalidateQueries({ queryKey: WATCHLIST_KEY });
     };
 
     return (

@@ -140,7 +140,7 @@
 // src/app/funds/page.tsx
 "use client";
 
-import { useEffect, useState } from "react";
+import { useMemo, useState } from "react";
 import {
   Container,
   Typography,
@@ -157,39 +157,23 @@ import {
   TableBody,
 } from "@mui/material";
 import FundListItem from "@/components/FundListItem";
-import { Scheme } from "@/types/scheme";
 import SyncFunds from "@/components/SyncFunds";
+import { useFunds } from "@/hooks/useFunds";
 
 export default function FundsPage() {
-  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
-  const [allFunds, setAllFunds] = useState<Scheme[]>([]);
-  const [totalPages, setTotalPages] = useState(1);
+  const { data, isLoading } = useFunds(page);
 
-  const limit = 50; // Items per page
+  const allFunds = data?.funds ?? [];
+  const totalPages = Math.ceil((data?.total ?? 0) / 50);
 
-  useEffect(() => {
-    async function fetchFunds() {
-      setLoading(true);
-      try {
-        // Fetch from our MongoDB-backed API
-        const res = await fetch(`/api/mf?page=${page}&limit=${limit}`);
-        const data = await res.json();
-        setAllFunds(data.funds || []);
-        setTotalPages(Math.ceil((data.total || 0) / limit));
-      } catch (error) {
-        console.error("Error fetching funds:", error);
-        setAllFunds([]);
-      } finally {
-        setLoading(false);
-      }
-    }
-    fetchFunds();
-  }, [page]); // Re-fetch when page changes
-
-  const filteredFunds = allFunds.filter((fund) =>
-    fund.schemeName.toLowerCase().includes(search.toLowerCase())
+  const filteredFunds = useMemo(
+    () =>
+      allFunds.filter((fund) =>
+        fund.schemeName.toLowerCase().includes(search.toLowerCase())
+      ),
+    [allFunds, search]
   );
 
   const handlePageChange = (_: React.ChangeEvent<unknown>, value: number) => {
@@ -218,7 +202,7 @@ export default function FundsPage() {
         sx={{ mb: 4, maxWidth: { sm: 400, md: 600 } }}
       />
 
-      {loading ? (
+      {isLoading ? (
         <Box sx={{ display: "flex", justifyContent: "center", my: 10 }}>
           <CircularProgress />
         </Box>

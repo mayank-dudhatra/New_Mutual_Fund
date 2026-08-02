@@ -37,6 +37,7 @@ import { Inter } from "next/font/google";
 import { CssBaseline } from "@mui/material";
 import Navbar from "@/components/Navbar";
 import { AuthProvider } from "@/context/AuthContext";
+import Providers from "./providers";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -55,10 +56,14 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
         <CssBaseline />
-        <AuthProvider>
-          <Navbar />
-          <main>{children}</main>
-        </AuthProvider>
+        {/* Providers persists across client-side navigation so cached
+            query/portfolio data is reused instead of refetched */}
+        <Providers>
+          <AuthProvider>
+            <Navbar />
+            <main>{children}</main>
+          </AuthProvider>
+        </Providers>
       </body>
     </html>
   );

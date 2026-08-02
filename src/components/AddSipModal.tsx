@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 import { TextField, Button, Box, Typography, InputAdornment, Alert, CircularProgress, MenuItem, Grid, Modal, Paper } from "@mui/material";
 import dayjs from "dayjs";
 import { useRouter } from "next/navigation";
+import { usePortfolioStore } from "@/store/portfolioStore";
 
 const style = {
   position: 'absolute',
@@ -64,7 +65,11 @@ export default function AddSipModal({ open, onClose, defaultSchemeCode = '', def
 
       const sipData = await sipRes.json();
       if (!sipRes.ok) throw new Error(sipData.error || "Failed to add SIP.");
-      
+
+      // Refresh the shared portfolio store so the new SIP appears immediately
+      // even when the cached portfolio is still fresh.
+      usePortfolioStore.getState().fetchPortfolio(true);
+
       onClose(); // Close the modal
       router.push('/virtual-portfolio'); // Navigate to the portfolio page
 

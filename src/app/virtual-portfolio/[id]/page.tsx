@@ -1,7 +1,7 @@
 // src/app/virtual-portfolio/[id]/page.tsx
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 import { useParams, useRouter } from "next/navigation";
 import {
   Container,
@@ -35,13 +35,9 @@ import {
   CartesianGrid,
   Legend,
 } from "recharts";
-import { VirtualSip, SipTransaction } from "@/models/VirtualPortfolio";
+import { VirtualSip } from "@/models/VirtualPortfolio";
 import { formatCurrency } from "@/lib/utils";
-
-interface NavPerformance {
-  currentNav: number | null;
-  prevNav: number | null;
-}
+import { useSipDetail } from "@/hooks/useSipDetail";
 
 interface Cashflow {
   amount: number;
@@ -81,45 +77,10 @@ export default function SipDetailPage() {
   const router = useRouter();
   const theme = useTheme();
 
-  const [sip, setSip] = useState<VirtualSip | null>(null);
-  const [transactions, setTransactions] = useState<SipTransaction[]>([]);
-  const [performance, setPerformance] = useState<NavPerformance>({ currentNav: null, prevNav: null });
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    let mounted = true;
-    async function load() {
-      try {
-        const res = await fetch(`/api/portfolio/${id}`);
-        if (!res.ok) throw new Error("Failed to load SIP.");
-        const data = await res.json();
-        if (!mounted) return;
-        setSip(data.sip);
-        setTransactions(data.transactions || []);
-
-        if (data.sip) {
-          const perfRes = await fetch("/api/portfolio/performance", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ schemeCodes: [data.sip.schemeCode] }),
-          });
-          if (perfRes.ok && mounted) {
-            const perfData = await perfRes.json();
-            setPerformance(perfData[data.sip.schemeCode] || { currentNav: null, prevNav: null });
-          }
-        }
-      } catch (err: any) {
-        if (mounted) setError(err.message);
-      } finally {
-        if (mounted) setLoading(false);
-      }
-    }
-    load();
-    return () => {
-      mounted = false;
-    };
-  }, [id]);
+  const { data, isLoading: loading, error } = useSipDetail(id);
+  const sip = data?.sip ?? null;
+  const transactions = data?.transactions ?? [];
+  const performance = data?.performance ?? { currentNav: null, prevNav: null };
 
   const currentNav = performance.currentNav;
 
@@ -186,7 +147,7 @@ export default function SipDetailPage() {
   if (error || !sip) {
     return (
       <Container maxWidth="md" sx={{ py: 6, textAlign: "center" }}>
-        <Typography color="error">{error || "SIP not found."}</Typography>
+        <Typography color="error">{(error as Error)?.message || "SIP not found."}</Typography>
         <Button sx={{ mt: 2 }} onClick={() => router.push("/virtual-portfolio")}>Back to Portfolio</Button>
       </Container>
     );
