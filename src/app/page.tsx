@@ -1,12 +1,15 @@
 // src/app/page.tsx
 "use client";
 
-import { Button, Container, Typography, Box, Paper, Grid, useTheme, alpha, Skeleton, Stack, Divider } from "@mui/material";
+import { useMemo, useState } from "react";
+import { Button, Container, Typography, Box, Paper, Grid, useTheme, alpha, Skeleton, Stack } from "@mui/material";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import { AreaChart, Area, ResponsiveContainer, YAxis, XAxis, Tooltip } from "recharts";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import TrendingUpIcon from "@mui/icons-material/TrendingUp";
+import TrendingDownIcon from "@mui/icons-material/TrendingDown";
 import TickerTape from "@/components/TickerTape";
 import ReturnBadge from "@/components/ReturnBadge";
 import { useDashboard } from "@/hooks/useDashboard";
@@ -39,11 +42,30 @@ const HERO_CHART_DATA = [
   { x: "Dec", v: 1589 }, { x: "", v: 1627 }, { x: "", v: 1654 }, { x: "", v: 1689 },
 ];
 
+const HERO_RANGES = ["1M", "3M", "6M", "1Y"] as const;
+const RANGE_POINTS: Record<(typeof HERO_RANGES)[number], number> = { "1M": 12, "3M": 24, "6M": 36, "1Y": 48 };
+const RANGE_LABEL: Record<(typeof HERO_RANGES)[number], string> = { "1M": "1-month", "3M": "3-month", "6M": "6-month", "1Y": "12-month" };
+
+const INDEX_CHIPS = [
+  { label: "NIFTY 50", change: 0.82 },
+  { label: "SENSEX", change: 0.74 },
+  { label: "BANK NIFTY", change: -0.32 },
+  { label: "INDIA VIX", change: -2.1 },
+];
+
+const HERO_STATS = [
+  { value: "1,000s", label: "Funds to explore" },
+  { value: "6+", label: "Return calculators" },
+  { value: "Live NAV", label: "Daily updates" },
+  { value: "Free", label: "Virtual SIP tracking" },
+];
+
 export default function LandingPage() {
   const { user } = useAuth();
   const router = useRouter();
   const theme = useTheme();
   const { data: dashboard, isLoading: moversLoading } = useDashboard();
+  const [heroRange, setHeroRange] = useState<(typeof HERO_RANGES)[number]>("1Y");
 
   // If the user is already logged in, send them to their dashboard.
   if (user) {
@@ -57,8 +79,14 @@ export default function LandingPage() {
         .slice(0, 12)
     : [];
 
-  const movers = dashboard?.gainers ?? [];
-  const moversB = dashboard?.losers ?? [];
+  const heroChartData = useMemo(
+    () => HERO_CHART_DATA.slice(-RANGE_POINTS[heroRange]),
+    [heroRange]
+  );
+
+  const latestNav = heroChartData[heroChartData.length - 1]?.v ?? 0;
+  const startNav = heroChartData[0]?.v ?? 0;
+  const rangeChange = startNav > 0 ? ((latestNav - startNav) / startNav) * 100 : 0;
 
   return (
     <Box>
@@ -66,13 +94,20 @@ export default function LandingPage() {
       <Box
         sx={{
           position: "relative",
-          background: "radial-gradient(1200px 600px at 80% -10%, rgba(108,99,255,0.35), transparent 60%), radial-gradient(900px 500px at 0% 110%, rgba(22,163,74,0.18), transparent 55%), linear-gradient(180deg, #0B1220 0%, #0F1A2E 100%)",
-          color: "#fff",
           overflow: "hidden",
+          background: `
+            radial-gradient(1000px 520px at 85% -10%, rgba(108,99,255,0.32), transparent 60%),
+            radial-gradient(800px 480px at 0% 110%, rgba(22,163,74,0.16), transparent 55%),
+            linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px),
+            linear-gradient(180deg, #0B1220 0%, #0F1A2E 100%)
+          `,
+          backgroundSize: "auto, auto, 44px 44px, 44px 44px, auto",
+          color: "#fff",
         }}
       >
         <Container maxWidth="lg" sx={{ py: { xs: 6, md: 9 }, position: "relative", zIndex: 1 }}>
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 3, flexWrap: "wrap" }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 4, flexWrap: "wrap" }}>
             <Paper
               sx={{
                 px: 1.5,
@@ -89,9 +124,9 @@ export default function LandingPage() {
               <Box sx={{ width: 8, height: 8, borderRadius: 99, bgcolor: "#22C55E", boxShadow: "0 0 8px #22C55E", animation: "pulse 1.6s ease-in-out infinite" }} />
               <Typography variant="caption" fontWeight={700}>LIVE MARKET DATA</Typography>
             </Paper>
-            <Typography variant="caption" color="rgba(255,255,255,0.6)">
-              Daily-updated NAV from AMFI
-            </Typography>
+            <Paper sx={{ px: 1.5, py: 0.5, borderRadius: 999, bgcolor: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.10)", color: "rgba(255,255,255,0.7)" }}>
+              <Typography variant="caption" fontWeight={600}>India · IST · Daily NAV from AMFI</Typography>
+            </Paper>
           </Box>
 
           <Grid container spacing={{ xs: 4, md: 6 }} alignItems="center">
@@ -101,18 +136,57 @@ export default function LandingPage() {
                 variant="h2"
                 component="h1"
                 fontWeight={900}
-                sx={{ mb: 2, letterSpacing: "-0.02em", fontSize: { xs: "2.2rem", md: "3.4rem" }, lineHeight: 1.1 }}
+                sx={{ mb: 2, letterSpacing: "-0.02em", fontSize: { xs: "2.2rem", md: "3.3rem" }, lineHeight: 1.08 }}
               >
                 Invest with{" "}
-                <Box component="span" sx={{ color: "#22C55E" }}>
+                <Box
+                  component="span"
+                  sx={{
+                    background: "linear-gradient(90deg, #22C55E 0%, #4ADE80 100%)",
+                    WebkitBackgroundClip: "text",
+                    WebkitTextFillColor: "transparent",
+                  }}
+                >
                   market-level clarity
                 </Box>{" "}
                 on every rupee.
               </Typography>
-              <Typography variant="h6" sx={{ mb: 4, fontWeight: 400, color: "rgba(255,255,255,0.72)", maxWidth: 520 }}>
+              <Typography variant="h6" sx={{ mb: 3, fontWeight: 400, color: "rgba(255,255,255,0.72)", maxWidth: 520 }}>
                 Explore thousands of mutual funds, track daily movers, run return calculators and
                 simulate SIPs — exactly the way you&apos;d track stocks.
               </Typography>
+
+              {/* Index chips */}
+              <Stack direction="row" spacing={1} useFlexGap sx={{ flexWrap: "wrap", mb: 3 }}>
+                {INDEX_CHIPS.map((chip) => {
+                  const up = chip.change >= 0;
+                  const Icon = up ? TrendingUpIcon : TrendingDownIcon;
+                  return (
+                    <Box
+                      key={chip.label}
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 0.75,
+                        px: 1.25,
+                        py: 0.6,
+                        borderRadius: 99,
+                        bgcolor: "rgba(255,255,255,0.05)",
+                        border: "1px solid rgba(255,255,255,0.10)",
+                      }}
+                    >
+                      <Typography variant="caption" fontWeight={700} sx={{ color: "rgba(255,255,255,0.7)" }}>
+                        {chip.label}
+                      </Typography>
+                      <Icon sx={{ fontSize: 14, color: up ? "#4ADE80" : "#F87171" }} />
+                      <Typography variant="caption" fontWeight={800} sx={{ color: up ? "#4ADE80" : "#F87171", fontVariantNumeric: "tabular-nums" }}>
+                        {up ? "+" : ""}
+                        {chip.change.toFixed(2)}%
+                      </Typography>
+                    </Box>
+                  );
+                })}
+              </Stack>
 
               <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap", mb: 4 }}>
                 <Button
@@ -123,7 +197,7 @@ export default function LandingPage() {
                   endIcon={<ArrowForwardIcon />}
                   sx={{ px: 4, bgcolor: "#22C55E", color: "#0B1220", fontWeight: 800, "&:hover": { bgcolor: "#16A34A" } }}
                 >
-                  Start Investing Free
+                  Get Started Free
                 </Button>
                 <Button
                   variant="outlined"
@@ -142,14 +216,9 @@ export default function LandingPage() {
               </Box>
 
               {/* Hero stats */}
-              <Box sx={{ display: "flex", gap: { xs: 3, md: 5 }, flexWrap: "wrap" }}>
-                {[
-                  { value: "1,000s", label: "Funds to explore" },
-                  { value: "6+", label: "Return calculators" },
-                  { value: "Live NAV", label: "Daily updates" },
-                  { value: "Free", label: "Virtual SIP tracking" },
-                ].map((stat) => (
-                  <Box key={stat.label}>
+              <Box sx={{ display: "flex", flexWrap: "wrap", gap: { xs: 2.5, md: 4 }, borderTop: "1px solid rgba(255,255,255,0.10)", pt: 3 }}>
+                {HERO_STATS.map((stat) => (
+                  <Box key={stat.label} sx={{ minWidth: 110 }}>
                     <Typography variant="h6" fontWeight={800} sx={{ color: "#22C55E" }}>
                       {stat.value}
                     </Typography>
@@ -161,7 +230,7 @@ export default function LandingPage() {
               </Box>
             </Grid>
 
-            {/* Right: animated market chart */}
+            {/* Right: interactive market chart */}
             <Grid size={{ xs: 12, md: 6 }}>
               <Paper
                 sx={{
@@ -173,20 +242,48 @@ export default function LandingPage() {
                   boxShadow: "0 30px 80px rgba(0,0,0,0.45)",
                 }}
               >
-                <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 1 }}>
+                <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 1.5 }}>
                   <Box>
                     <Typography variant="caption" color="rgba(255,255,255,0.6)">
-                      FundFolio Growth Index
+                      FundFolio Growth Index · Past {RANGE_LABEL[heroRange]}
                     </Typography>
                     <Typography variant="h5" fontWeight={800} sx={{ color: "#fff" }}>
-                      {formatCurrency(1689)}
+                      {formatCurrency(latestNav)}
                     </Typography>
                   </Box>
-                  <ReturnBadge value={4.32} variant="body2" />
+                  <ReturnBadge value={rangeChange} variant="body1" />
                 </Box>
-                <Box sx={{ height: { xs: 220, md: 260 } }}>
+
+                {/* Range toggle */}
+                <Stack direction="row" spacing={1} sx={{ mb: 2 }}>
+                  {HERO_RANGES.map((range) => (
+                    <Box
+                      key={range}
+                      role="button"
+                      onClick={() => setHeroRange(range)}
+                      sx={{
+                        px: 1.5,
+                        py: 0.5,
+                        borderRadius: 99,
+                        cursor: "pointer",
+                        fontSize: "0.72rem",
+                        fontWeight: 800,
+                        userSelect: "none",
+                        bgcolor: heroRange === range ? "#22C55E" : "rgba(255,255,255,0.06)",
+                        color: heroRange === range ? "#0B1220" : "rgba(255,255,255,0.7)",
+                        border: "1px solid rgba(255,255,255,0.10)",
+                        transition: "all 0.2s ease",
+                        "&:hover": { bgcolor: heroRange === range ? "#22C55E" : "rgba(255,255,255,0.12)" },
+                      }}
+                    >
+                      {range}
+                    </Box>
+                  ))}
+                </Stack>
+
+                <Box sx={{ height: { xs: 220, md: 240 } }}>
                   <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart data={HERO_CHART_DATA} margin={{ top: 10, right: 5, left: 5, bottom: 0 }}>
+                    <AreaChart data={heroChartData} margin={{ top: 10, right: 5, left: 5, bottom: 0 }}>
                       <defs>
                         <linearGradient id="heroArea" x1="0" y1="0" x2="0" y2="1">
                           <stop offset="0%" stopColor="#22C55E" stopOpacity={0.5} />
@@ -218,7 +315,7 @@ export default function LandingPage() {
                   </ResponsiveContainer>
                 </Box>
                 <Typography variant="caption" color="rgba(255,255,255,0.45)">
-                  Illustrative 12-month growth curve
+                  Illustrative {RANGE_LABEL[heroRange]} growth curve
                 </Typography>
               </Paper>
             </Grid>
@@ -236,113 +333,6 @@ export default function LandingPage() {
           </Container>
         </Box>
       </Box>
-
-      {/* ============ MARKET MOVERS ============ */}
-      <Container maxWidth="lg" sx={{ py: { xs: 5, md: 8 } }}>
-        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", mb: 3, flexWrap: "wrap", gap: 1 }}>
-          <Box>
-            <Typography variant="h4" fontWeight={800} sx={{ mb: 0.5 }}>
-              Today&apos;s Market Movers
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Real funds sampled from our universe, ranked by 1-day change.
-            </Typography>
-          </Box>
-          <Button component={Link} href="/login" endIcon={<ArrowForwardIcon />} sx={{ textTransform: "none" }}>
-            See all funds
-          </Button>
-        </Box>
-
-        <Grid container spacing={{ xs: 2, md: 3 }}>
-          <Grid size={{ xs: 12, md: 6 }}>
-            <Paper variant="outlined" sx={{ borderRadius: 3, overflow: "hidden" }}>
-              <Box sx={{ px: 2.5, py: 1.5, bgcolor: alpha(theme.palette.success.main, 0.08), borderBottom: `1px solid ${theme.palette.divider}` }}>
-                <Typography variant="subtitle1" fontWeight={800} sx={{ color: "success.main" }}>
-                  Top Gainers
-                </Typography>
-              </Box>
-              {moversLoading ? (
-                <Box sx={{ p: 2.5, display: "grid", gap: 1.5 }}>
-                  {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} variant="rounded" height={44} />)}
-                </Box>
-              ) : (
-                <Box>
-                  {movers.slice(0, 4).map((m, i) => (
-                    <Link key={m.schemeCode} href={`/scheme/${m.schemeCode}`} style={{ textDecoration: "none", color: "inherit" }}>
-                      <Stack
-                        direction="row"
-                        alignItems="center"
-                        justifyContent="space-between"
-                        sx={{ px: 2.5, py: 1.4, "&:hover": { bgcolor: alpha(theme.palette.success.main, 0.05) }, borderBottom: i < 3 ? `1px solid ${theme.palette.divider}` : 0 }}
-                      >
-                        <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, minWidth: 0 }}>
-                          <Typography variant="body2" fontWeight={800} color="text.secondary" sx={{ width: 18 }}>
-                            {i + 1}
-                          </Typography>
-                          <Typography variant="body2" fontWeight={600} sx={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                            {m.schemeName}
-                          </Typography>
-                        </Box>
-                        <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-                          <Typography variant="body2" color="text.secondary" sx={{ fontVariantNumeric: "tabular-nums" }}>
-                            ₹{m.nav.toFixed(2)}
-                          </Typography>
-                          <ReturnBadge value={m.dayChange} variant="body2" />
-                        </Box>
-                      </Stack>
-                    </Link>
-                  ))}
-                </Box>
-              )}
-            </Paper>
-          </Grid>
-
-          <Grid size={{ xs: 12, md: 6 }}>
-            <Paper variant="outlined" sx={{ borderRadius: 3, overflow: "hidden" }}>
-              <Box sx={{ px: 2.5, py: 1.5, bgcolor: alpha(theme.palette.error.main, 0.08), borderBottom: `1px solid ${theme.palette.divider}` }}>
-                <Typography variant="subtitle1" fontWeight={800} sx={{ color: "error.main" }}>
-                  Top Losers
-                </Typography>
-              </Box>
-              {moversLoading ? (
-                <Box sx={{ p: 2.5, display: "grid", gap: 1.5 }}>
-                  {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} variant="rounded" height={44} />)}
-                </Box>
-              ) : (
-                <Box>
-                  {moversB.slice(0, 4).map((m, i) => (
-                    <Link key={m.schemeCode} href={`/scheme/${m.schemeCode}`} style={{ textDecoration: "none", color: "inherit" }}>
-                      <Stack
-                        direction="row"
-                        alignItems="center"
-                        justifyContent="space-between"
-                        sx={{ px: 2.5, py: 1.4, "&:hover": { bgcolor: alpha(theme.palette.error.main, 0.05) }, borderBottom: i < 3 ? `1px solid ${theme.palette.divider}` : 0 }}
-                      >
-                        <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, minWidth: 0 }}>
-                          <Typography variant="body2" fontWeight={800} color="text.secondary" sx={{ width: 18 }}>
-                            {i + 1}
-                          </Typography>
-                          <Typography variant="body2" fontWeight={600} sx={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                            {m.schemeName}
-                          </Typography>
-                        </Box>
-                        <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-                          <Typography variant="body2" color="text.secondary" sx={{ fontVariantNumeric: "tabular-nums" }}>
-                            ₹{m.nav.toFixed(2)}
-                          </Typography>
-                          <ReturnBadge value={m.dayChange} variant="body2" />
-                        </Box>
-                      </Stack>
-                    </Link>
-                  ))}
-                </Box>
-              )}
-            </Paper>
-          </Grid>
-        </Grid>
-      </Container>
-
-      <Divider />
 
       {/* ============ PLATFORM OVERVIEW ============ */}
       <PlatformOverview />
