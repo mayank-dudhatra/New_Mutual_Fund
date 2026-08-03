@@ -139,6 +139,7 @@ export default function FundsPage() {
             <Table size="small" sx={{ tableLayout: "fixed", width: "100%" }}>
               <TableHead>
                 <TableRow>
+                  <TableCell sx={{ width: 40 }} />
                   <TableCell>Name</TableCell>
                   <TableCell align="right" sx={{ width: 110 }}>NAV</TableCell>
                   <TableCell align="right" sx={{ width: 88 }}>1D</TableCell>

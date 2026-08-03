@@ -185,9 +185,10 @@ interface NavEntry {
 interface SchemeHeaderProps {
   meta: any;
   navHistory: NavEntry[];
+  onStartSip?: () => void;
 }
 
-export default function SchemeHeader({ meta, navHistory }: SchemeHeaderProps) {
+export default function SchemeHeader({ meta, navHistory, onStartSip }: SchemeHeaderProps) {
   const theme = useTheme();
   const { user } = useAuth();
   const [isInWatchlist, setIsInWatchlist] = useState(false);
@@ -299,18 +300,30 @@ export default function SchemeHeader({ meta, navHistory }: SchemeHeaderProps) {
                 </Box>
             </Box>
         </Box>
-        {user && (
-            <Button
-                variant={isInWatchlist ? "outlined" : "contained"}
-                color={isInWatchlist ? "success" : "primary"}
-                onClick={handleWatchlistToggle}
-                disabled={loadingWatchlist}
-                startIcon={loadingWatchlist ? <CircularProgress size={20} color="inherit" /> : (isInWatchlist ? <CheckIcon /> : <AddIcon />)}
-                sx={{ ml: 2, flexShrink: 0 }}
-            >
-                {isInWatchlist ? "In Watchlist" : "Add to Watchlist"}
-            </Button>
-        )}
+        <Stack direction="row" spacing={1} sx={{ ml: 2, flexShrink: 0 }}>
+            {onStartSip && (
+                <Button
+                    variant="contained"
+                    startIcon={<AddIcon />}
+                    onClick={onStartSip}
+                    sx={{ flexShrink: 0 }}
+                >
+                    Start Virtual SIP
+                </Button>
+            )}
+            {user && (
+                <Button
+                    variant={isInWatchlist ? "outlined" : "contained"}
+                    color={isInWatchlist ? "success" : "primary"}
+                    onClick={handleWatchlistToggle}
+                    disabled={loadingWatchlist}
+                    startIcon={loadingWatchlist ? <CircularProgress size={20} color="inherit" /> : (isInWatchlist ? <CheckIcon /> : <AddIcon />)}
+                    sx={{ flexShrink: 0 }}
+                >
+                    {isInWatchlist ? "In Watchlist" : "Add to Watchlist"}
+                </Button>
+            )}
+        </Stack>
       </Box>
 
       <Divider sx={{ my: 3 }} />

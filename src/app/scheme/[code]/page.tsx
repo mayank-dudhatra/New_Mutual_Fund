@@ -311,9 +311,7 @@ import {
   Box,
   Skeleton,
   useTheme,
-  Button,
 } from "@mui/material";
-import AddIcon from '@mui/icons-material/Add';
 
 // Import all the necessary components for this page
 import InteractiveNavChart from "@/components/InteractiveNavChart";
@@ -369,19 +367,8 @@ export default function SchemeDetailPage() {
         defaultSchemeName={meta.schemeName}
       />
       
-      <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2 }}>
-          <Typography variant="h4" fontWeight={700}>Fund Details</Typography>
-          <Button 
-            variant="contained" 
-            startIcon={<AddIcon />}
-            onClick={() => setSipModalOpen(true)}
-          >
-            Start Virtual SIP
-          </Button>
-      </Box>
-
       <Box sx={{ mb: 4 }}>
-        <SchemeHeader meta={meta} navHistory={navHistory} />
+        <SchemeHeader meta={meta} navHistory={navHistory} onStartSip={() => setSipModalOpen(true)} />
       </Box>
 
       <Grid container spacing={{ xs: 3, md: 4 }}>

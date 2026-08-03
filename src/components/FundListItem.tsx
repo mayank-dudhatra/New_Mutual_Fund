@@ -11,13 +11,20 @@ import {
   TableRow,
   TableCell,
   Skeleton,
+  IconButton,
 } from "@mui/material";
+import StarIcon from "@mui/icons-material/Star";
+import StarBorderIcon from "@mui/icons-material/StarBorder";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 import { Scheme } from "@/types/scheme";
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
 import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
 import { useSchemeDetails } from "@/hooks/useSchemeDetails";
+import { useWatchlist, WATCHLIST_KEY } from "@/hooks/useWatchlist";
+import { useAuth } from "@/context/AuthContext";
 import ReturnBadge from "./ReturnBadge";
 import { getFundCategory } from "@/lib/fundCategory";
 
@@ -33,8 +40,38 @@ const CATEGORY_COLORS: Record<string, string> = {
 
 export default function FundListItem({ fund }: { fund: Scheme }) {
   const theme = useTheme();
+  const { user, loading: authLoading } = useAuth();
+  const router = useRouter();
+  const queryClient = useQueryClient();
+  const { data: watchlistData } = useWatchlist();
   const { data, isLoading: loading } = useSchemeDetails(fund.schemeCode);
   const navHistory = data?.navHistory;
+
+  const watchlistCodes = watchlistData?.watchlist ?? [];
+  const isInWatchlist = watchlistCodes.some((item) => item.schemeCode === fund.schemeCode);
+
+  const handleToggleWatchlist = async () => {
+    if (authLoading) return;
+    if (!user) {
+      router.push("/login");
+      return;
+    }
+
+    try {
+      if (isInWatchlist) {
+        await fetch(`/api/watchlist/${fund.schemeCode}`, { method: "DELETE" });
+      } else {
+        await fetch("/api/watchlist", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ schemeCode: fund.schemeCode, schemeName: fund.schemeName }),
+        });
+      }
+      queryClient.invalidateQueries({ queryKey: WATCHLIST_KEY });
+    } catch (err) {
+      console.error("Failed to update watchlist", err);
+    }
+  };
 
   const details = useMemo(() => {
     if (!navHistory || navHistory.length <= 1) return null;
@@ -96,6 +133,21 @@ export default function FundListItem({ fund }: { fund: Scheme }) {
         "&:hover": { backgroundColor: alpha(theme.palette.primary.main, 0.05) },
       }}
     >
+      {/* Watchlist star */}
+      <TableCell sx={{ width: 40, p: "0 4px" }}>
+        <IconButton
+          size="small"
+          onClick={handleToggleWatchlist}
+          aria-label={isInWatchlist ? "Remove from watchlist" : "Add to watchlist"}
+          sx={{
+            color: isInWatchlist ? "#F59E0B" : theme.palette.text.secondary,
+            "&:hover": { color: "#F59E0B" },
+          }}
+        >
+          {isInWatchlist ? <StarIcon fontSize="small" /> : <StarBorderIcon fontSize="small" />}
+        </IconButton>
+      </TableCell>
+
       {/* Name */}
       <TableCell>
         <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
