@@ -14,6 +14,8 @@ export interface Scheme {
   isinGrowth?: string | null;  // ISIN for growth option (or null)
   isinDivReinvestment?: string | null; // ISIN for dividend reinvestment option (or null)
   isinDivPayout?: string | null;       // ISIN for dividend payout option (or null)
+  nav?: number;                // Latest NAV (from activefunds list)
+  navDate?: string;            // Date of the latest NAV (DD-MM-YYYY)
 }
 
 // ✅ Returns (absolute % for given time periods)

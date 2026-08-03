@@ -2,7 +2,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Button, Container, Typography, Box, Paper, Grid, useTheme, alpha, Skeleton, Stack } from "@mui/material";
+import { Button, Container, Typography, Box, Paper, Grid, alpha, Skeleton, Stack } from "@mui/material";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
@@ -63,9 +63,17 @@ const HERO_STATS = [
 export default function LandingPage() {
   const { user } = useAuth();
   const router = useRouter();
-  const theme = useTheme();
   const { data: dashboard, isLoading: moversLoading } = useDashboard();
   const [heroRange, setHeroRange] = useState<(typeof HERO_RANGES)[number]>("1Y");
+
+  const heroChartData = useMemo(
+    () => HERO_CHART_DATA.slice(-RANGE_POINTS[heroRange]),
+    [heroRange]
+  );
+
+  const latestNav = heroChartData[heroChartData.length - 1]?.v ?? 0;
+  const startNav = heroChartData[0]?.v ?? 0;
+  const rangeChange = startNav > 0 ? ((latestNav - startNav) / startNav) * 100 : 0;
 
   // If the user is already logged in, send them to their dashboard.
   if (user) {
@@ -78,15 +86,6 @@ export default function LandingPage() {
         .map((m) => ({ schemeCode: m.schemeCode, schemeName: m.schemeName, dayChange: m.dayChange, nav: m.nav }))
         .slice(0, 12)
     : [];
-
-  const heroChartData = useMemo(
-    () => HERO_CHART_DATA.slice(-RANGE_POINTS[heroRange]),
-    [heroRange]
-  );
-
-  const latestNav = heroChartData[heroChartData.length - 1]?.v ?? 0;
-  const startNav = heroChartData[0]?.v ?? 0;
-  const rangeChange = startNav > 0 ? ((latestNav - startNav) / startNav) * 100 : 0;
 
   return (
     <Box>

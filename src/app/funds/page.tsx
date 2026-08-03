@@ -24,7 +24,6 @@ import {
 import SearchIcon from "@mui/icons-material/Search";
 import FilterListIcon from "@mui/icons-material/FilterList";
 import FundListItem from "@/components/FundListItem";
-import SyncFunds from "@/components/SyncFunds";
 import { useFunds } from "@/hooks/useFunds";
 import { FUND_CATEGORIES, getFundCategory, FundCategory } from "@/lib/fundCategory";
 
@@ -37,6 +36,7 @@ export default function FundsPage() {
   const allFunds = useMemo(() => data?.funds ?? [], [data]);
   const total = data?.total ?? 0;
   const totalPages = Math.ceil(total / 50);
+  const latestNavDate = useMemo(() => allFunds[0]?.navDate, [allFunds]);
 
   const filteredFunds = useMemo(() => {
     const query = search.trim().toLowerCase();
@@ -55,7 +55,7 @@ export default function FundsPage() {
   };
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
+    <Container maxWidth="xl" sx={{ py: 4 }}>
       <Box
         sx={{
           display: "flex",
@@ -71,10 +71,20 @@ export default function FundsPage() {
             Mutual Fund Explorer
           </Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-            {isLoading ? "Loading funds…" : `Showing ${filteredFunds.length} of ${total.toLocaleString()} funds`}
+            {isLoading ? "Loading funds…" : `Showing ${filteredFunds.length} of ${total.toLocaleString()} active funds`}
           </Typography>
         </Box>
-        <SyncFunds />
+        <Paper variant="outlined" sx={{ px: 2, py: 1, borderRadius: 2, display: "flex", alignItems: "center", gap: 1.25 }}>
+          <Box sx={{ width: 9, height: 9, borderRadius: 99, bgcolor: "success.main", boxShadow: "0 0 8px #16A34A", animation: "pulse 1.6s ease-in-out infinite" }} />
+          <Box>
+            <Typography variant="caption" fontWeight={800} sx={{ color: "success.main", display: "block", lineHeight: 1.2 }}>
+              LIVE NAV
+            </Typography>
+            <Typography variant="caption" color="text.secondary" sx={{ lineHeight: 1.2 }}>
+              {latestNavDate ? `as of ${latestNavDate}` : "from AMFI"}
+            </Typography>
+          </Box>
+        </Paper>
       </Box>
 
       <Stack
@@ -125,18 +135,18 @@ export default function FundsPage() {
         </Box>
       ) : (
         <Paper variant="outlined" sx={{ borderRadius: 3, overflow: "hidden" }}>
-          <TableContainer>
-            <Table size="small">
+          <TableContainer sx={{ width: "100%" }}>
+            <Table size="small" sx={{ tableLayout: "fixed", width: "100%" }}>
               <TableHead>
                 <TableRow>
-                  <TableCell sx={{ width: '44%' }}>Name</TableCell>
-                  <TableCell align="right">NAV</TableCell>
-                  <TableCell align="right">1D</TableCell>
-                  <TableCell align="right">1M</TableCell>
-                  <TableCell align="right">6M</TableCell>
-                  <TableCell align="right">1Y</TableCell>
-                  <TableCell align="right">3Y</TableCell>
-                  <TableCell align="right">CAGR</TableCell>
+                  <TableCell>Name</TableCell>
+                  <TableCell align="right" sx={{ width: 110 }}>NAV</TableCell>
+                  <TableCell align="right" sx={{ width: 88 }}>1D</TableCell>
+                  <TableCell align="right" sx={{ width: 88 }}>1M</TableCell>
+                  <TableCell align="right" sx={{ width: 88 }}>6M</TableCell>
+                  <TableCell align="right" sx={{ width: 88 }}>1Y</TableCell>
+                  <TableCell align="right" sx={{ width: 88 }}>3Y</TableCell>
+                  <TableCell align="right" sx={{ width: 88 }}>CAGR</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>

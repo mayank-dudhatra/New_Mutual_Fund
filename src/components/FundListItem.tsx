@@ -61,36 +61,31 @@ export default function FundListItem({ fund }: { fund: Scheme }) {
     };
 
     const inceptionDate = sortedHistory[0].parsedDate;
-    const yearsSinceInception = latestDate.diff(inceptionDate, 'year', true);
+    const yearsSinceInception = latestDate.diff(inceptionDate, "year", true);
 
     return {
       latestNav,
+      latestDateStr: latestDate.format("DD MMM YYYY"),
       oneDay:
         previousEntry.nav > 0 ? ((latestNav - previousEntry.nav) / previousEntry.nav) * 100 : null,
       oneMonth: changeOver(1, "month"),
       sixMonths: changeOver(6, "month"),
       oneYear: changeOver(1, "year"),
       threeYears: changeOver(3, "year"),
-      cagr: yearsSinceInception > 0 ? (Math.pow(latestNav / sortedHistory[0].nav, 1 / yearsSinceInception) - 1) * 100 : null,
+      cagr:
+        yearsSinceInception > 0
+          ? (Math.pow(latestNav / sortedHistory[0].nav, 1 / yearsSinceInception) - 1) * 100
+          : null,
     };
   }, [navHistory]);
 
+  const meta = data?.meta;
+  const displayNav = details?.latestNav ?? fund.nav;
+  const displayDate = details?.latestDateStr ?? fund.navDate;
+
   const category = getFundCategory(fund.schemeName);
   const categoryColor = CATEGORY_COLORS[category] ?? theme.palette.grey[600];
-
-  const cells = [
-    <TableCell key="nav" align="right">
-      <Typography variant="body2" fontWeight={600} sx={{ fontVariantNumeric: "tabular-nums" }}>
-        {details?.latestNav ? `₹${details.latestNav.toFixed(2)}` : 'N/A'}
-      </Typography>
-    </TableCell>,
-    <TableCell key="1d" align="right"><ReturnBadge value={details?.oneDay} /></TableCell>,
-    <TableCell key="1m" align="right"><ReturnBadge value={details?.oneMonth} /></TableCell>,
-    <TableCell key="6m" align="right"><ReturnBadge value={details?.sixMonths} /></TableCell>,
-    <TableCell key="1y" align="right"><ReturnBadge value={details?.oneYear} /></TableCell>,
-    <TableCell key="3y" align="right"><ReturnBadge value={details?.threeYears} /></TableCell>,
-    <TableCell key="cagr" align="right"><ReturnBadge value={details?.cagr} /></TableCell>,
-  ];
+  const subtitle = meta ? `${meta.fundHouse} · ${meta.category}` : category;
 
   return (
     <TableRow
@@ -101,6 +96,7 @@ export default function FundListItem({ fund }: { fund: Scheme }) {
         "&:hover": { backgroundColor: alpha(theme.palette.primary.main, 0.05) },
       }}
     >
+      {/* Name */}
       <TableCell>
         <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
           <Avatar
@@ -114,7 +110,7 @@ export default function FundListItem({ fund }: { fund: Scheme }) {
             {fund.schemeName.charAt(0)}
           </Avatar>
           <Box sx={{ minWidth: 0 }}>
-            <Link href={`/scheme/${fund.schemeCode}`} passHref style={{ textDecoration: 'none' }}>
+            <Link href={`/scheme/${fund.schemeCode}`} passHref style={{ textDecoration: "none" }}>
               <Typography
                 variant="body2"
                 fontWeight={600}
@@ -129,18 +125,45 @@ export default function FundListItem({ fund }: { fund: Scheme }) {
                 {fund.schemeName}
               </Typography>
             </Link>
-            <Typography variant="caption" color={categoryColor} sx={{ fontWeight: 600 }}>
-              {category}
+            <Typography
+              variant="caption"
+              color={categoryColor}
+              fontWeight={600}
+              sx={{ display: "block", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}
+            >
+              {subtitle}
             </Typography>
           </Box>
         </Box>
       </TableCell>
 
+      {/* NAV + date */}
+      <TableCell align="right">
+        <Typography variant="body2" fontWeight={600} sx={{ fontVariantNumeric: "tabular-nums" }}>
+          {displayNav != null ? `₹${displayNav.toFixed(2)}` : "N/A"}
+        </Typography>
+        {displayDate && (
+          <Typography variant="caption" color="text.secondary" sx={{ fontVariantNumeric: "tabular-nums" }}>
+            {displayDate}
+          </Typography>
+        )}
+      </TableCell>
+
+      {/* Returns */}
       {loading
-        ? Array.from({ length: 7 }).map((_, i) => (
-            <TableCell key={i} align="right"><Skeleton variant="text" width={48} /></TableCell>
+        ? Array.from({ length: 6 }).map((_, i) => (
+            <TableCell key={i} align="right">
+              <Skeleton variant="text" width={48} />
+            </TableCell>
           ))
-        : cells}
+        : [
+            <TableCell key="1d" align="right"><ReturnBadge value={details?.oneDay} /></TableCell>,
+            <TableCell key="1m" align="right"><ReturnBadge value={details?.oneMonth} /></TableCell>,
+            <TableCell key="6m" align="right"><ReturnBadge value={details?.sixMonths} /></TableCell>,
+            <TableCell key="1y" align="right"><ReturnBadge value={details?.oneYear} /></TableCell>,
+            <TableCell key="3y" align="right"><ReturnBadge value={details?.threeYears} /></TableCell>,
+            <TableCell key="cagr" align="right"><ReturnBadge value={details?.cagr} /></TableCell>,
+          ]}
     </TableRow>
   );
 }

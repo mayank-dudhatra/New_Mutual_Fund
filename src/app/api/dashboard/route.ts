@@ -1,7 +1,8 @@
 // src/app/api/dashboard/route.ts
 // Read-only aggregation used by the Home dashboard "Top Movers" + ticker.
-// Samples a handful of open-ended equity funds, computes latest NAV + returns
-// from the cached AMFI data, and returns top gainers/losers by 1D change.
+// Samples a handful of equity funds from the activefunds collection,
+// computes latest NAV + returns from the cached AMFI data, and returns
+// top gainers/losers by 1D change.
 import { NextResponse } from "next/server";
 import clientPromise from "@/lib/mongodb";
 import { getScheme } from "@/lib/api";
@@ -39,31 +40,37 @@ export async function GET() {
   try {
     const client = await clientPromise;
     const db = client.db("mutualfund");
-    const collection = db.collection("funds");
+    const collection = db.collection("activefunds");
 
-    // Prefer a random sample of equity-ish open-ended schemes for a
-    // sensible "market movers" list; fall back to any sample if empty.
+    // Sample a handful of equity-ish schemes for a sensible "market movers"
+    // list. activefunds has no schemeType, so filter by fund-name keywords;
+    // fall back to a random sample if the keyword filter comes up empty.
     let sampled: FundDoc[] = [];
     try {
       sampled = (await collection
         .aggregate([
           {
             $match: {
-              schemeType: { $in: ["Open Ended Schemes", "Open Ended"] },
-              schemeName: {
+              name: {
                 $regex: "Large Cap|Flexi Cap|Mid Cap|Small Cap|ELSS|Multi Cap|Value|Index",
                 $options: "i",
               },
             },
           },
           { $sample: { size: SAMPLE_SIZE } },
+          { $project: { _id: 0, schemeCode: "$code", schemeName: "$name" } },
         ])
         .toArray()) as unknown as FundDoc[];
     } catch {
       sampled = [];
     }
     if (sampled.length < 10) {
-      sampled = (await collection.aggregate([{ $sample: { size: SAMPLE_SIZE } }]).toArray()) as unknown as FundDoc[];
+      sampled = (await collection
+        .aggregate([
+          { $sample: { size: SAMPLE_SIZE } },
+          { $project: { _id: 0, schemeCode: "$code", schemeName: "$name" } },
+        ])
+        .toArray()) as unknown as FundDoc[];
     }
 
     const settled = await Promise.allSettled(
